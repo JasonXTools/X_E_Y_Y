@@ -1,0 +1,3662 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DexXShoot</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --bg: #121212;
+            --bg-2: #1a1a1a;
+            --card-bg: rgba(38, 38, 38, 0.7);
+            --border-dim: rgba(255, 255, 255, 0.08);
+            --border-mid: rgba(255, 255, 255, 0.18);
+            --border-strong: rgba(255, 255, 255, 0.3);
+            --text-primary: #e8e8e8;
+            --text-secondary: #a0a0a0;
+            --text-muted: #6e6e6e;
+            --text-dim: #454545;
+            --gray-light: #d4d4d4;
+            --gray-mid: #a0a0a0;
+            --gray-soft: #b8b8b8;
+        }
+
+        html, body { overflow-x: hidden; }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text-primary);
+            min-height: 100vh;
+            font-family: 'Rajdhani', system-ui, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 20px;
+            position: relative;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(circle at 20% 0%, rgba(255, 255, 255, 0.05) 0%, transparent 45%),
+                radial-gradient(circle at 85% 100%, rgba(255, 255, 255, 0.03) 0%, transparent 45%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+            background-size: 50px 50px;
+            mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+            -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 75%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 520px;
+            position: relative;
+            z-index: 1;
+            padding-bottom: 30px;
+        }
+
+        .page { display: none; animation: pageIn 0.6s cubic-bezier(0.22, 1, 0.36, 1); }
+        .page.active { display: block; }
+        .page.leaving { animation: pageOut 0.4s ease forwards; }
+
+        @keyframes pageIn {
+            from { opacity: 0; transform: translateY(20px); filter: blur(5px); }
+            to { opacity: 1; transform: translateY(0); filter: blur(0); }
+        }
+        @keyframes pageOut {
+            from { opacity: 1; transform: translateY(0); filter: blur(0); }
+            to { opacity: 0; transform: translateY(-18px); filter: blur(6px); }
+        }
+
+        .hero {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            padding: 50px 20px;
+        }
+
+        .hero-badge {
+            display: inline-block;
+            padding: 7px 22px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-mid);
+            font-family: 'Cinzel', serif;
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: var(--gray-light);
+            margin-bottom: 30px;
+            animation: fadeUp 0.7s ease 0.1s both;
+        }
+
+        .frame {
+            position: relative;
+            width: 100%;
+            max-width: 440px;
+            margin-bottom: 32px;
+            padding: 2px;
+            background: linear-gradient(135deg, #6e6e6e, #d4d4d4, #6e6e6e);
+            background-size: 200% 200%;
+            animation: fadeUp 0.7s ease 0.2s both, borderFlow 6s linear infinite;
+            box-shadow: 0 0 40px rgba(255, 255, 255, 0.15), 0 15px 40px rgba(0,0,0,0.7);
+            border-radius: 14px;
+            transition: transform 0.4s ease;
+        }
+        @keyframes borderFlow {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        .frame:hover { transform: translateY(-4px); }
+
+        .frame-inner {
+            border-radius: 12px;
+            overflow: hidden;
+            background: #000;
+            position: relative;
+        }
+        .frame-inner::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, transparent 60%, rgba(18, 18, 18, 0.5));
+            pointer-events: none;
+        }
+        .frame img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .hero-title {
+            font-family: 'Cinzel', serif;
+            font-size: clamp(1.4rem, 5vw, 1.9rem);
+            font-weight: 700;
+            line-height: 1.3;
+            margin-bottom: 14px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            animation: fadeUp 0.7s ease 0.3s both;
+        }
+        .hero-title .accent {
+            display: inline-block;
+            font-family: 'Share Tech Mono', monospace;
+            font-weight: 700;
+            background: linear-gradient(135deg, #d4d4d4, #ffffff);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradientShift 4s ease infinite;
+            filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.3));
+        }
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .hero-subtitle {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            letter-spacing: 6px;
+            text-transform: uppercase;
+            margin-bottom: 42px;
+            animation: fadeUp 0.7s ease 0.4s both;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .btn-primary {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            gap: 14px;
+            padding: 15px 48px;
+            border: 1px solid var(--border-strong);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
+            color: var(--text-primary);
+            font-family: 'Cinzel', serif;
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+            cursor: pointer;
+            overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+            border-radius: 12px;
+            box-shadow: 0 0 25px rgba(255, 255, 255, 0.1), inset 0 0 15px rgba(255, 255, 255, 0.03);
+            animation: fadeUp 0.7s ease 0.5s both;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+        }
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.7s ease;
+        }
+        .btn-primary:hover::before { left: 100%; }
+        .btn-primary:hover {
+            border-color: #ffffff;
+            color: #ffffff;
+            transform: translateY(-3px);
+            box-shadow: 0 0 45px rgba(255, 255, 255, 0.3), inset 0 0 25px rgba(255, 255, 255, 0.08);
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.7);
+        }
+        .btn-primary:active { transform: translateY(-1px); }
+        .btn-primary .arrow {
+            display: inline-block;
+            transition: transform 0.35s ease;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 1.05rem;
+            color: var(--gray-light);
+        }
+        .btn-primary:hover .arrow { transform: translateX(7px); }
+
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+            animation: fadeUp 0.5s ease 0.1s both;
+        }
+
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 9px 18px;
+            background: rgba(38, 38, 38, 0.85);
+            border: 1px solid var(--border-mid);
+            color: var(--text-primary);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            cursor: pointer;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+        .btn-back:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: #ffffff;
+            color: #ffffff;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+        }
+
+        .live-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(38, 38, 38, 0.85);
+            border: 1px solid var(--border-mid);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.62rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--gray-light);
+            border-radius: 10px;
+        }
+        .live-badge::before {
+            content: '';
+            width: 6px; height: 6px;
+            background: var(--gray-light);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--gray-light);
+            animation: blink 1.5s ease-in-out infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .dash-hero {
+            position: relative;
+            margin-bottom: 16px;
+            padding: 2px;
+            background: linear-gradient(135deg, #6e6e6e, #d4d4d4, #6e6e6e);
+            background-size: 200% 200%;
+            border-radius: 14px;
+            overflow: hidden;
+            animation: fadeUp 0.6s ease 0.15s both, borderFlow 6s linear infinite;
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.1), 0 10px 35px rgba(0,0,0,0.6);
+        }
+        .dash-hero-inner {
+            position: relative;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .dash-hero img { width: 100%; display: block; }
+        .dash-hero-inner::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, transparent 50%, rgba(18, 18, 18, 0.9));
+        }
+        .dash-hero-title {
+            position: absolute;
+            bottom: 16px; left: 20px;
+            z-index: 2;
+        }
+        .dash-hero-title h2 {
+            font-family: 'Cinzel', serif;
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            color: #ffffff;
+        }
+        .dash-hero-title p {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.62rem;
+            color: var(--gray-light);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        .card {
+            background: var(--card-bg);
+            backdrop-filter: blur(14px) saturate(140%);
+            -webkit-backdrop-filter: blur(14px) saturate(140%);
+            border: 1px solid var(--border-dim);
+            border-radius: 14px;
+            padding: 18px;
+            margin-bottom: 14px;
+            position: relative;
+            transition: all 0.35s ease;
+            animation: fadeUp 0.6s ease 0.2s both;
+        }
+        .card:hover {
+            border-color: var(--border-mid);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5), 0 0 25px rgba(255, 255, 255, 0.05);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 14px;
+            font-family: 'Cinzel', serif;
+            font-size: 0.82rem;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--text-primary);
+        }
+        .card-header .icon {
+            width: 30px; height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-mid);
+            border-radius: 8px;
+            font-size: 0.85rem;
+            flex-shrink: 0;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border-dim);
+            gap: 12px;
+        }
+        .info-row:last-child { border-bottom: none; }
+        .info-label {
+            color: var(--text-muted);
+            font-size: 0.72rem;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            font-family: 'Share Tech Mono', monospace;
+        }
+        .info-value {
+            color: var(--text-primary);
+            font-weight: 600;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.76rem;
+            text-align: right;
+            word-break: break-all;
+            max-width: 60%;
+        }
+        .info-value.accent { color: var(--gray-light); text-shadow: 0 0 10px rgba(255, 255, 255, 0.3); }
+
+        .pulse-dot {
+            display: inline-block;
+            width: 6px; height: 6px;
+            background: var(--gray-light);
+            border-radius: 50%;
+            box-shadow: 0 0 10px var(--gray-light);
+            animation: blink 1.2s infinite;
+            margin-right: 7px;
+            vertical-align: middle;
+        }
+
+        .player {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .player-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 9px 20px;
+            border: 1px solid var(--border-mid);
+            background: rgba(56, 56, 56, 0.6);
+            color: var(--text-secondary);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            cursor: pointer;
+            border-radius: 9px;
+            transition: all 0.3s ease;
+        }
+        .player-btn:hover {
+            border-color: var(--gray-light);
+            color: var(--gray-light);
+            box-shadow: 0 0 18px rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+        .player-btn.active {
+            background: linear-gradient(135deg, #d4d4d4, #ffffff);
+            color: #121212;
+            border-color: transparent;
+            box-shadow: 0 0 28px rgba(255, 255, 255, 0.3);
+        }
+        .player-status {
+            margin-left: auto;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+        .player-status.playing {
+            color: var(--gray-light);
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+        }
+
+        .equalizer {
+            display: none;
+            align-items: flex-end;
+            gap: 3px;
+            height: 14px;
+        }
+        .equalizer.active { display: flex; }
+        .equalizer span {
+            display: block;
+            width: 2px;
+            background: linear-gradient(180deg, #d4d4d4, #6e6e6e);
+            box-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+            animation: equalize 0.9s ease-in-out infinite;
+        }
+        .equalizer span:nth-child(1) { animation-delay: 0s; height: 5px; }
+        .equalizer span:nth-child(2) { animation-delay: 0.15s; height: 12px; }
+        .equalizer span:nth-child(3) { animation-delay: 0.3s; height: 8px; }
+        .equalizer span:nth-child(4) { animation-delay: 0.45s; height: 10px; }
+        @keyframes equalize {
+            0%, 100% { transform: scaleY(1); }
+            50% { transform: scaleY(0.3); }
+        }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+        }
+        .tool-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 18px 6px 14px;
+            background: rgba(56, 56, 56, 0.5);
+            border: 1px solid var(--border-mid);
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+            font-family: inherit;
+        }
+        .tool-card .tool-icon {
+            font-size: 1.4rem;
+            transition: transform 0.35s ease;
+            filter: drop-shadow(0 0 6px currentColor) grayscale(100%);
+            color: var(--gray-light);
+        }
+        .tool-card .tool-name {
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.6rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--text-secondary);
+            transition: color 0.3s ease;
+            text-align: center;
+        }
+        .tool-card:hover {
+            transform: translateY(-4px);
+            background: rgba(80, 80, 80, 0.7);
+            border-color: #ffffff;
+            box-shadow: 0 8px 30px rgba(255, 255, 255, 0.15);
+        }
+        .tool-card:hover .tool-icon { transform: scale(1.15); }
+        .tool-card:hover .tool-name { color: #ffffff; }
+
+        .contact-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 18px;
+            background: rgba(26, 26, 26, 0.6);
+            border: 1px solid var(--border-mid);
+            border-radius: 12px;
+            color: var(--text-primary);
+            text-decoration: none;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 600;
+            font-size: 0.85rem;
+            letter-spacing: 1px;
+            transition: all 0.35s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .contact-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.7s ease;
+        }
+        .contact-btn:hover::before { transform: translateX(100%); }
+        .contact-btn:hover {
+            border-color: #ffffff;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5), 0 0 25px rgba(255, 255, 255, 0.12);
+            transform: translateY(-2px);
+        }
+        .tg-icon {
+            width: 36px; height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--border-mid);
+            border-radius: 10px;
+            font-size: 0.95rem;
+            color: var(--gray-light);
+            flex-shrink: 0;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 22px 0 5px;
+            font-family: 'Cinzel', serif;
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            animation: fadeUp 0.6s ease 0.4s both;
+        }
+        .footer .crown { color: var(--gray-light); margin-right: 6px; }
+        .footer .author {
+            color: #ffffff;
+            font-weight: 700;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(10, 10, 10, 0.9);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            overflow-y: auto;
+        }
+        .modal-overlay.active { display: flex; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .modal-box {
+            width: 100%;
+            max-width: 440px;
+            background: linear-gradient(160deg, rgba(48, 48, 48, 0.98), rgba(18, 18, 18, 0.98));
+            border: 1px solid var(--border-mid);
+            border-radius: 16px;
+            padding: 22px;
+            box-shadow: 0 0 60px rgba(255, 255, 255, 0.08), 0 25px 60px rgba(0,0,0,0.9);
+            animation: modalIn 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+            margin: auto;
+            position: relative;
+            overflow: hidden;
+        }
+        .modal-box::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #d4d4d4, #ffffff, #d4d4d4, transparent);
+            background-size: 200% 100%;
+            animation: borderFlow 3s linear infinite;
+        }
+        @keyframes modalIn {
+            from { opacity: 0; transform: translateY(30px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding-bottom: 16px;
+            margin-bottom: 18px;
+            border-bottom: 1px solid var(--border-mid);
+        }
+        .modal-icon {
+            width: 44px; height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            border-radius: 12px;
+            flex-shrink: 0;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid var(--border-mid);
+            color: var(--gray-light);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.1);
+        }
+        .modal-title {
+            font-family: 'Cinzel', serif;
+            font-size: 1rem;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--text-primary);
+        }
+        .modal-sub {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.58rem;
+            color: var(--text-muted);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-top: 3px;
+        }
+
+        .modal-label {
+            display: block;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.62rem;
+            color: var(--gray-light);
+            margin-bottom: 8px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .modal-input {
+            width: 100%;
+            background: rgba(18, 18, 18, 0.8);
+            border: 1px solid var(--border-mid);
+            border-radius: 10px;
+            padding: 12px 14px;
+            color: var(--text-primary);
+            font-size: 0.88rem;
+            font-family: 'Share Tech Mono', monospace;
+            outline: none;
+            transition: all 0.3s ease;
+            margin-bottom: 12px;
+        }
+        .modal-input::placeholder { color: var(--text-dim); }
+        .modal-input:focus {
+            border-color: #ffffff;
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1), 0 0 20px rgba(255, 255, 255, 0.15);
+            background: rgba(18, 18, 18, 0.95);
+        }
+        textarea.modal-input { resize: vertical; min-height: 85px; }
+
+        .modal-input-group {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+        .modal-input-group .prefix {
+            display: flex;
+            align-items: center;
+            padding: 12px 14px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--border-mid);
+            border-radius: 10px;
+            color: var(--gray-light);
+            font-family: 'Share Tech Mono', monospace;
+            font-weight: 700;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+            min-width: 62px;
+            justify-content: center;
+        }
+        .modal-input-group .modal-input { margin-bottom: 0; }
+
+        .tabs {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 4px;
+            padding: 4px;
+            background: rgba(18, 18, 18, 0.7);
+            border: 1px solid var(--border-mid);
+            border-radius: 10px;
+            margin-bottom: 16px;
+        }
+        .tab {
+            padding: 9px 5px;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            cursor: pointer;
+            border-radius: 7px;
+            transition: all 0.3s ease;
+        }
+        .tab:hover:not(.active) {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .tab.active {
+            background: linear-gradient(135deg, #d4d4d4, #ffffff);
+            color: #121212;
+            box-shadow: 0 0 22px rgba(255, 255, 255, 0.3);
+        }
+
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; animation: fadeIn 0.3s ease; }
+
+        .modal-btn {
+            width: 100%;
+            padding: 13px;
+            border: 1px solid var(--border-mid);
+            border-radius: 11px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
+            color: var(--text-primary);
+            font-family: 'Cinzel', serif;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+            margin-bottom: 10px;
+            position: relative;
+            overflow: hidden;
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+        }
+        .modal-btn.primary::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%;
+            width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.7s ease;
+        }
+        .modal-btn.primary:hover:not(:disabled)::before { left: 100%; }
+        .modal-btn.primary:hover:not(:disabled) {
+            border-color: #ffffff;
+            color: #ffffff;
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.3), inset 0 0 20px rgba(255, 255, 255, 0.08);
+            transform: translateY(-2px);
+        }
+        .modal-btn.primary:disabled { opacity: 0.5; cursor: not-allowed; }
+        .modal-btn.secondary {
+            background: rgba(38, 38, 38, 0.6);
+            color: var(--text-muted);
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.7rem;
+            letter-spacing: 2px;
+        }
+        .modal-btn.secondary:hover {
+            background: rgba(70, 70, 70, 0.8);
+            color: var(--text-primary);
+            border-color: var(--border-strong);
+        }
+
+        .modal-result {
+            display: none;
+            margin-top: 16px;
+            padding: 16px;
+            background: rgba(18, 18, 18, 0.7);
+            border: 1px solid var(--border-mid);
+            border-radius: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .modal-result.show { display: block; animation: fadeIn 0.4s ease; }
+
+        .result-heading {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.6rem;
+            color: var(--gray-light);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            margin-bottom: 12px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .result-heading::before {
+            content: '';
+            width: 4px; height: 12px;
+            background: linear-gradient(180deg, #d4d4d4, #6e6e6e);
+            border-radius: 2px;
+        }
+
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border-dim);
+            font-size: 0.78rem;
+        }
+        .result-row:last-child { border-bottom: none; }
+        .result-label {
+            color: var(--text-muted);
+            font-size: 0.7rem;
+            flex-shrink: 0;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: 600;
+        }
+        .result-value {
+            color: var(--text-primary);
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.74rem;
+            font-weight: 600;
+            text-align: right;
+            max-width: 65%;
+            word-break: break-word;
+        }
+        .result-value.valid { color: var(--gray-light); }
+        .result-value.invalid { color: #f472b6; }
+        .result-value.warning { color: #d4d4d4; }
+        .result-value.info { color: var(--gray-light); }
+
+        .ip-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.58rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            border-radius: 5px;
+            border: 1px solid;
+            color: var(--gray-light);
+            border-color: var(--border-mid);
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .wa-link-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            color: var(--text-primary);
+            border: 1px solid #ffffff;
+            border-radius: 11px;
+            font-family: 'Cinzel', serif;
+            font-weight: 700;
+            font-size: 0.72rem;
+            letter-spacing: 2.5px;
+            text-transform: uppercase;
+            text-decoration: none;
+            margin-top: 14px;
+            transition: all 0.35s ease;
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+        }
+        .wa-link-btn:hover {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
+            box-shadow: 0 0 35px rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            color: #ffffff;
+        }
+
+        .bulk-item {
+            padding: 11px;
+            background: rgba(18, 18, 18, 0.55);
+            border: 1px solid var(--border-mid);
+            border-radius: 10px;
+            margin-bottom: 7px;
+            font-size: 0.72rem;
+        }
+        .bulk-item .bulk-ip {
+            font-family: 'Share Tech Mono', monospace;
+            color: var(--gray-light);
+            font-weight: 700;
+            font-size: 0.78rem;
+            display: block;
+            margin-bottom: 5px;
+        }
+        .bulk-item .bulk-info {
+            color: var(--text-secondary);
+            font-size: 0.7rem;
+            line-height: 1.55;
+            font-family: 'Rajdhani', sans-serif;
+        }
+        .bulk-item .bulk-info strong { color: var(--text-primary); }
+        .bulk-item.error { border-color: rgba(244, 114, 182, 0.3); }
+        .bulk-item.error .bulk-ip { color: #f472b6; }
+
+        .email-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 10px 13px;
+            background: rgba(18, 18, 18, 0.55);
+            border: 1px solid var(--border-mid);
+            border-radius: 10px;
+            margin-bottom: 6px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.72rem;
+            color: var(--gray-light);
+            word-break: break-all;
+            transition: all 0.25s ease;
+        }
+        .email-item:hover {
+            border-color: #ffffff;
+            background: rgba(255, 255, 255, 0.05);
+        }
+        .copy-btn {
+            background: rgba(56, 56, 56, 0.85);
+            border: 1px solid var(--border-mid);
+            border-radius: 7px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 5px 10px;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.58rem;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            transition: all 0.25s ease;
+            flex-shrink: 0;
+        }
+        .copy-btn:hover {
+            background: linear-gradient(135deg, #d4d4d4, #ffffff);
+            color: #121212;
+            border-color: transparent;
+        }
+
+        .crawl-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+        .stat-card {
+            padding: 11px 8px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-mid);
+            border-radius: 10px;
+        }
+        .stat-num {
+            display: block;
+            font-family: 'Cinzel', serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--gray-light);
+            line-height: 1.2;
+            text-shadow: 0 0 15px rgba(255, 255, 255, 0.4);
+        }
+        .stat-label {
+            display: block;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.55rem;
+            color: var(--text-muted);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-top: 3px;
+            font-weight: 600;
+        }
+
+        .progress-track {
+            width: 100%;
+            height: 3px;
+            background: rgba(18, 18, 18, 0.7);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 12px;
+            display: none;
+            border: 1px solid var(--border-mid);
+        }
+        .progress-track.active { display: block; }
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #6e6e6e, #d4d4d4, #ffffff);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.3);
+            transition: width 0.3s ease;
+        }
+
+        .api-note {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.6rem;
+            color: var(--text-dim);
+            text-align: center;
+            margin-top: 10px;
+            font-style: italic;
+        }
+
+        .hint {
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            line-height: 1.55;
+            font-family: 'Share Tech Mono', monospace;
+        }
+        .hint code {
+            background: rgba(255, 255, 255, 0.06);
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: var(--gray-light);
+            font-size: 0.66rem;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 12px; height: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-top-color: var(--gray-light);
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .modal-result::-webkit-scrollbar { width: 5px; }
+        .modal-result::-webkit-scrollbar-track { background: transparent; }
+        .modal-result::-webkit-scrollbar-thumb {
+            background: linear-gradient(180deg, #d4d4d4, #6e6e6e);
+            border-radius: 5px;
+        }
+
+        .ip-loading {
+            color: var(--text-muted);
+            font-style: italic;
+            font-family: 'Share Tech Mono', monospace;
+            font-weight: 400;
+        }
+
+        /* ===== LING ANALYZER ===== */
+        .link-risk-banner {
+            display: none;
+            padding: 18px 16px;
+            border-radius: 12px;
+            margin-bottom: 14px;
+            border: 1px solid var(--border-mid);
+            background: rgba(18, 18, 18, 0.7);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .link-risk-banner.show { display: block; animation: fadeIn 0.4s ease; }
+        .link-risk-banner::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: currentColor;
+            box-shadow: 0 0 15px currentColor;
+        }
+        .link-risk-level {
+            font-family: 'Cinzel', serif;
+            font-size: 1.05rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 10px;
+            text-shadow: 0 0 15px currentColor;
+        }
+        .link-risk-score {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 2.4rem;
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: 4px;
+            color: var(--text-primary);
+            text-shadow: 0 0 20px currentColor;
+        }
+        .link-risk-score small {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+        .link-risk-bar {
+            height: 8px;
+            background: rgba(18, 18, 18, 0.8);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 12px 0 6px;
+            border: 1px solid var(--border-mid);
+        }
+        .link-risk-bar-fill {
+            height: 100%;
+            width: 0%;
+            border-radius: 4px;
+            background: currentColor;
+            box-shadow: 0 0 12px currentColor;
+            transition: width 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        .link-risk-label {
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 0.62rem;
+            color: var(--text-muted);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+        .link-detail-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 9px 12px;
+            background: rgba(18, 18, 18, 0.55);
+            border: 1px solid var(--border-mid);
+            border-radius: 9px;
+            margin-bottom: 6px;
+            font-family: 'Rajdhani', sans-serif;
+            font-size: 0.78rem;
+            line-height: 1.5;
+            color: var(--text-secondary);
+            transition: all 0.25s ease;
+            word-break: break-word;
+        }
+        .link-detail-item:hover {
+            border-color: var(--border-strong);
+            background: rgba(255, 255, 255, 0.04);
+        }
+        .link-detail-item.safe { border-left: 3px solid #4ade80; }
+        .link-detail-item.warn { border-left: 3px solid #fbbf24; }
+        .link-detail-item.danger { border-left: 3px solid #f472b6; }
+        .link-detail-item.critical { border-left: 3px solid #ef4444; }
+        .link-detail-item .ld-icon { flex-shrink: 0; font-size: 0.9rem; }
+        .link-detail-item .ld-text { flex: 1; color: var(--text-primary); font-weight: 500; }
+
+        @media (max-width: 480px) {
+            body { padding: 14px; }
+            .hero { padding: 30px 15px; }
+            .hero-title { font-size: 1.25rem; }
+            .hero-subtitle { font-size: 0.6rem; letter-spacing: 5px; }
+            .btn-primary { padding: 13px 38px; font-size: 0.78rem; letter-spacing: 3px; }
+            .tools-grid { gap: 6px; }
+            .tool-card { padding: 14px 4px 11px; }
+            .tool-card .tool-icon { font-size: 1.2rem; }
+            .tool-card .tool-name { font-size: 0.55rem; letter-spacing: 0.5px; }
+            .card { padding: 15px; }
+            .player-status { margin-left: 0; width: 100%; text-align: center; margin-top: 6px; }
+            .modal-box { padding: 20px; }
+            .modal-icon { width: 40px; height: 40px; font-size: 1.1rem; }
+            .modal-title { font-size: 0.92rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+
+        <div class="page active" id="startPage">
+            <div class="hero">
+                <div class="hero-badge">Beta Version</div>
+                <div class="frame">
+                    <div class="frame-inner">
+                        <img src="https://files.catbox.moe/o3vm3v.gif" alt="DexXShoot">
+                    </div>
+                </div>
+                <h1 class="hero-title">
+                    Tools By<br>
+                    <span class="accent">DexXShoot</span>
+                </h1>
+                <p class="hero-subtitle">// Dex Not A Criminal</p>
+                <button class="btn-primary" onclick="goToDashboard()">
+                    <span>Start</span>
+                    <span class="arrow">→</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="page" id="dashboardPage">
+            <div class="top-bar">
+                <button class="btn-back" onclick="goToStart(event)">← Kembali</button>
+                <div class="live-badge">Online</div>
+            </div>
+
+            <div class="dash-hero">
+                <div class="dash-hero-inner">
+                    <img src="https://files.catbox.moe/o3vm3v.gif" alt="Dashboard">
+                    <div class="dash-hero-title">
+                        <h2>Control Center</h2>
+                        <p>// Codex By Dex</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><span class="icon">👤</span> Informasi Pengguna</div>
+                <div class="info-row">
+                    <span class="info-label">IP Address</span>
+                    <span class="info-value" id="ipAddress"><span class="ip-loading">Melacak...</span></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Lokasi</span>
+                    <span class="info-value" id="location"><span class="ip-loading">Melacak...</span></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">ISP</span>
+                    <span class="info-value" id="isp"><span class="ip-loading">Melacak...</span></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Status</span>
+                    <span class="info-value accent"><span class="pulse-dot"></span>Online</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><span class="icon">🎵</span> Ambient Music</div>
+                <div class="player">
+                    <button class="player-btn" id="btnPlay" onclick="playMusic()">▶ Play</button>
+                    <button class="player-btn" id="btnStop" onclick="stopMusic()">■ Stop</button>
+                    <div class="equalizer" id="equalizer">
+                        <span></span><span></span><span></span><span></span>
+                    </div>
+                    <span class="player-status" id="statusText">stopped</span>
+                </div>
+                <audio id="bgMusic" src="https://i.top4top.io/m_3927vlrmt0.mp3" loop preload="auto"></audio>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><span class="icon">🔍</span> OSINT Tools</div>
+                <div class="tools-grid">
+                    <button class="tool-card" onclick="openModal('waModal')">
+                        <span class="tool-icon">💬</span>
+                        <span class="tool-name">WhatsApp</span>
+                    </button>
+                    <button class="tool-card" onclick="openModal('ipModal')">
+                        <span class="tool-icon">🌐</span>
+                        <span class="tool-name">IP Lookup</span>
+                    </button>
+                    <button class="tool-card" onclick="openModal('emailModal')">
+                        <span class="tool-icon">🕷️</span>
+                        <span class="tool-name">Email Crawl</span>
+                    </button>
+                    <button class="tool-card" onclick="openModal('nikModal')">
+                        <span class="tool-icon">💳</span>
+                        <span class="tool-name">NIK</span>
+                    </button>
+                    <button class="tool-card" onclick="openModal('dorkModal')">
+                        <span class="tool-icon">🔎</span>
+                        <span class="tool-name">Dorking</span>
+                    </button>
+                    <button class="tool-card" onclick="openModal('breachModal')">
+                        <span class="tool-icon">🛡️</span>
+                        <span class="tool-name">Breach</span>
+                    </button>
+                    <button class="tool-card" onclick="openModal('lingModal')">
+                        <span class="tool-icon">🔗</span>
+                        <span class="tool-name">Ling Analyzer</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><span class="icon">✉</span> Kontak Author</div>
+                <a href="#" class="contact-btn">
+                    <span class="tg-icon">✈</span>
+                    <span>DexXShoot</span>
+                </a>
+            </div>
+
+            <div class="footer">
+                <span class="crown">♛</span>Create by <span class="author">DexXShoot</span>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- MODAL WHATSAPP -->
+    <div class="modal-overlay" id="waModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <div class="modal-icon">💬</div>
+                <div>
+                    <div class="modal-title">WhatsApp OSINT</div>
+                    <div class="modal-sub">Deep Number Intelligence</div>
+                </div>
+            </div>
+            <label class="modal-label">Nomor WhatsApp</label>
+            <div class="modal-input-group">
+                <div class="prefix" id="waPrefix" title="Indonesia">+62</div>
+                <input type="tel" class="modal-input" id="waNumber" placeholder="81234567890" maxlength="20"
+                    oninput="autoDetectDial(this.value)"
+                    onkeypress="if(event.key==='Enter') runWaOsint()">
+            </div>
+            <button class="modal-btn primary" id="btnWaCheck" onclick="runWaOsint()">Cek Nomor</button>
+            <div class="modal-result" id="waResult">
+                <div class="result-heading">📋 Data Dasar</div>
+                <div class="result-row"><span class="result-label">Internasional</span><span class="result-value" id="resNumber">-</span></div>
+                <div class="result-row"><span class="result-label">Nasional</span><span class="result-value" id="resNasional">-</span></div>
+                <div class="result-row"><span class="result-label">Lokal</span><span class="result-value" id="resLokal">-</span></div>
+                <div class="result-row"><span class="result-label">Raw</span><span class="result-value" id="resRaw">-</span></div>
+                <div class="result-row"><span class="result-label">Negara</span><span class="result-value" id="resCountry">-</span></div>
+                <div class="result-row"><span class="result-label">Kode Negara</span><span class="result-value" id="resKodeNegara">-</span></div>
+                <div class="result-row"><span class="result-label">Panjang</span><span class="result-value" id="resPanjang">-</span></div>
+                <div class="result-row"><span class="result-label">Status</span><span class="result-value" id="resStatus">-</span></div>
+
+                <div class="result-heading" style="margin-top:14px;">📡 Operator & Jaringan</div>
+                <div class="result-row"><span class="result-label">Operator</span><span class="result-value" id="resOperator">-</span></div>
+                <div class="result-row"><span class="result-label">Prefix</span><span class="result-value" id="resPrefix">-</span></div>
+                <div class="result-row"><span class="result-label">Jaringan</span><span class="result-value" id="resJaringan">-</span></div>
+                <div class="result-row"><span class="result-label">Provider</span><span class="result-value" id="resTipeKartu">-</span></div>
+                <div class="result-row"><span class="result-label">Sumber Data</span><span class="result-value" id="resGenerasi">-</span></div>
+
+                <div class="result-heading" style="margin-top:14px;">🗺️ Wilayah & Zona</div>
+                <div class="result-row"><span class="result-label">Wilayah</span><span class="result-value" id="resWilayah">-</span></div>
+                <div class="result-row"><span class="result-label">Zona Waktu</span><span class="result-value" id="resZona">-</span></div>
+                <div class="result-row"><span class="result-label">UTC Offset</span><span class="result-value" id="resUtc">-</span></div>
+                <div class="result-row"><span class="result-label">Kode Area</span><span class="result-value" id="resArea">-</span></div>
+
+                <div class="result-heading" style="margin-top:14px;">🔢 Analisis Digit</div>
+                <div class="result-row"><span class="result-label">Digit 1</span><span class="result-value" id="resDigit1">-</span></div>
+                <div class="result-row"><span class="result-label">3 Digit Awal</span><span class="result-value" id="resDigit3">-</span></div>
+                <div class="result-row"><span class="result-label">4 Digit Awal</span><span class="result-value" id="resDigit4">-</span></div>
+                <div class="result-row"><span class="result-label">Tengah</span><span class="result-value" id="resMiddle">-</span></div>
+                <div class="result-row"><span class="result-label">4 Digit Akhir</span><span class="result-value" id="resLast">-</span></div>
+                <div class="result-row"><span class="result-label">Digit Unik</span><span class="result-value" id="resUnik">-</span></div>
+
+                <div class="result-heading" style="margin-top:14px;">🎯 Estimasi & Peluang</div>
+                <div class="result-row"><span class="result-label">MCC/MNC</span><span class="result-value" id="resUmurNomor">-</span></div>
+                <div class="result-row"><span class="result-label">Tipe User</span><span class="result-value" id="resTipeUser">-</span></div>
+                <div class="result-row"><span class="result-label">Peluang Aktif</span><span class="result-value" id="resPeluang">-</span></div>
+                <div class="result-row"><span class="result-label">Rekomendasi</span><span class="result-value" id="resRekomendasi">-</span></div>
+
+                <div class="result-heading" style="margin-top:14px;">🔐 Kode & Format</div>
+                <div class="result-row"><span class="result-label">E.164</span><span class="result-value" id="resE164">-</span></div>
+                <div class="result-row"><span class="result-label">RFC3966</span><span class="result-value" id="resRfc">-</span></div>
+                <div class="result-row"><span class="result-label">Hash</span><span class="result-value" id="resMd5">-</span></div>
+                <div class="result-row"><span class="result-label">Base64</span><span class="result-value" id="resB64">-</span></div>
+                <div class="result-row"><span class="result-label">CRC32</span><span class="result-value" id="resCrc">-</span></div>
+
+                <div class="result-heading" style="margin-top:14px;">🔗 Link & Aksi</div>
+                <div class="result-row"><span class="result-label">wa.me</span><span class="result-value" id="resWaMe">-</span></div>
+                <div class="result-row"><span class="result-label">API Link</span><span class="result-value" id="resApiLink">-</span></div>
+                <div class="result-row"><span class="result-label">QR Link</span><span class="result-value" id="resQrLink">-</span></div>
+
+                <a href="#" class="wa-link-btn" id="waLink" target="_blank">Buka Chat WhatsApp</a>
+            </div>
+            <button class="modal-btn secondary" onclick="closeModal('waModal')">✕ Tutup</button>
+        </div>
+    </div>
+
+    <!-- MODAL IP LOOKUP -->
+    <div class="modal-overlay" id="ipModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <div class="modal-icon">🌐</div>
+                <div>
+                    <div class="modal-title">IP Lookup</div>
+                    <div class="modal-sub">Universal Intelligence</div>
+                </div>
+            </div>
+            <div class="tabs">
+                <button class="tab active" data-tab="single" onclick="switchIpTab('single')">Single</button>
+                <button class="tab" data-tab="bulk" onclick="switchIpTab('bulk')">Bulk</button>
+                <button class="tab" data-tab="mine" onclick="switchIpTab('mine')">IP Saya</button>
+            </div>
+            <div class="tab-panel active" id="tab-single">
+                <label class="modal-label">IP / IPv6 / Domain</label>
+                <div class="hint">Contoh: <code>8.8.8.8</code> · <code>google.com</code></div>
+                <input type="text" class="modal-input" id="ipInput" placeholder="8.8.8.8 atau google.com"
+                    onkeypress="if(event.key==='Enter') runIpLookup()">
+                <button class="modal-btn primary" id="btnIpCheck" onclick="runIpLookup()">Cari Data IP</button>
+            </div>
+            <div class="tab-panel" id="tab-bulk">
+                <label class="modal-label">Multiple IP (1 per baris)</label>
+                <div class="hint">Maks 20 IP</div>
+                <textarea class="modal-input" id="bulkIpInput" placeholder="8.8.8.8&#10;1.1.1.1&#10;208.67.222.222"></textarea>
+                <button class="modal-btn primary" id="btnBulkCheck" onclick="runBulkLookup()">Cari Semua IP</button>
+            </div>
+            <div class="tab-panel" id="tab-mine">
+                <div class="hint">Lihat info lengkap IP publik kamu saat ini.</div>
+                <button class="modal-btn primary" id="btnMyIp" onclick="runMyIpLookup()">Lihat IP Saya</button>
+            </div>
+            <div class="modal-result" id="ipResult">
+                <div class="result-heading">Hasil IP Lookup</div>
+                <div class="result-row"><span class="result-label">IP</span><span class="result-value" id="ipResIp">-</span></div>
+                <div class="result-row"><span class="result-label">Tipe</span><span class="result-value" id="ipResIpType">-</span></div>
+                <div class="result-row"><span class="result-label">Versi</span><span class="result-value" id="ipResVersion">-</span></div>
+                <div class="result-row"><span class="result-label">Negara</span><span class="result-value" id="ipResCountry">-</span></div>
+                <div class="result-row"><span class="result-label">Region</span><span class="result-value" id="ipResRegion">-</span></div>
+                <div class="result-row"><span class="result-label">Kota</span><span class="result-value" id="ipResCity">-</span></div>
+                <div class="result-row"><span class="result-label">Kode Pos</span><span class="result-value" id="ipResPostal">-</span></div>
+                <div class="result-row"><span class="result-label">Latitude</span><span class="result-value" id="ipResLat">-</span></div>
+                <div class="result-row"><span class="result-label">Longitude</span><span class="result-value" id="ipResLon">-</span></div>
+                <div class="result-row"><span class="result-label">Zona Waktu</span><span class="result-value" id="ipResTz">-</span></div>
+                <div class="result-row"><span class="result-label">ISP</span><span class="result-value" id="ipResIsp">-</span></div>
+                <div class="result-row"><span class="result-label">ASN</span><span class="result-value" id="ipResAsn">-</span></div>
+                <div class="result-row"><span class="result-label">Mata Uang</span><span class="result-value" id="ipResCurrency">-</span></div>
+                <div class="result-row"><span class="result-label">Reverse DNS</span><span class="result-value" id="ipResHostname">-</span></div>
+                <div class="api-note" id="apiStatus"></div>
+            </div>
+            <div class="modal-result" id="bulkResult">
+                <div class="result-heading">Hasil Bulk Lookup</div>
+                <div id="bulkResultList"></div>
+            </div>
+            <button class="modal-btn secondary" onclick="closeModal('ipModal')">✕ Tutup</button>
+        </div>
+    </div>
+
+    <!-- MODAL EMAIL CRAWL -->
+    <div class="modal-overlay" id="emailModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <div class="modal-icon">🕷️</div>
+                <div>
+                    <div class="modal-title">Email Crawl</div>
+                    <div class="modal-sub">Extract From URL</div>
+                </div>
+            </div>
+            <label class="modal-label">URL Website</label>
+            <input type="url" class="modal-input" id="crawlUrl" placeholder="https://example.com"
+                onkeypress="if(event.key==='Enter') runEmailCrawl()">
+            <button class="modal-btn primary" id="btnEmailCrawl" onclick="runEmailCrawl()">Crawl Email</button>
+            <div class="progress-track" id="crawlProgress">
+                <div class="progress-fill" id="crawlProgressFill"></div>
+            </div>
+            <div class="modal-result" id="emailResult">
+                <div class="result-heading">Hasil Crawling</div>
+                <div class="crawl-stats">
+                    <div class="stat-card">
+                        <span class="stat-num" id="statEmail">0</span>
+                        <span class="stat-label">Email</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-num" id="statDomain">0</span>
+                        <span class="stat-label">Domain</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-num" id="statStatus">-</span>
+                        <span class="stat-label">Status</span>
+                    </div>
+                </div>
+                <div class="result-heading" style="margin-top: 14px;">Daftar Email</div>
+                <div id="emailList"></div>
+                <div class="api-note" id="crawlStatus"></div>
+            </div>
+            <button class="modal-btn secondary" onclick="closeModal('emailModal')">✕ Tutup</button>
+        </div>
+    </div>
+
+    <!-- MODAL NIK -->
+    <div class="modal-overlay" id="nikModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <div class="modal-icon">💳</div>
+                <div>
+                    <div class="modal-title">Cek NIK</div>
+                    <div class="modal-sub">Indonesia Identity Decoder</div>
+                </div>
+            </div>
+            <label class="modal-label">NIK (16 Digit)</label>
+            <input type="text" class="modal-input" id="nikInput" placeholder="3201234567890001" maxlength="16"
+                inputmode="numeric" onkeypress="if(event.key==='Enter') runNikDecode()"
+                oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+            <button class="modal-btn primary" id="btnNikCheck" onclick="runNikDecode()">Decode NIK</button>
+            <div class="modal-result" id="nikResult">
+                <div class="result-heading">Hasil Decode NIK</div>
+                <div class="result-row"><span class="result-label">NIK</span><span class="result-value" id="nikResNik">-</span></div>
+                <div class="result-row"><span class="result-label">Valid</span><span class="result-value" id="nikResValid">-</span></div>
+                <div class="result-row"><span class="result-label">Provinsi</span><span class="result-value" id="nikResProv">-</span></div>
+                <div class="result-row"><span class="result-label">Kab/Kota</span><span class="result-value" id="nikResKab">-</span></div>
+                <div class="result-row"><span class="result-label">Kecamatan</span><span class="result-value" id="nikResKec">-</span></div>
+                <div class="result-row"><span class="result-label">Tgl Lahir</span><span class="result-value" id="nikResTgl">-</span></div>
+                <div class="result-row"><span class="result-label">Hari Lahir</span><span class="result-value" id="nikResHari">-</span></div>
+                <div class="result-row"><span class="result-label">Umur</span><span class="result-value" id="nikResUmur">-</span></div>
+                <div class="result-row"><span class="result-label">Jenis Kelamin</span><span class="result-value" id="nikResJk">-</span></div>
+                <div class="result-row"><span class="result-label">Zodiak</span><span class="result-value" id="nikResZodiak">-</span></div>
+                <div class="result-row"><span class="result-label">Generasi</span><span class="result-value" id="nikResGen">-</span></div>
+                <div class="result-row"><span class="result-label">No. Urut</span><span class="result-value" id="nikResUrut">-</span></div>
+                <div class="api-note">*Kode wilayah berdasarkan 6 digit pertama NIK</div>
+            </div>
+            <button class="modal-btn secondary" onclick="closeModal('nikModal')">✕ Tutup</button>
+        </div>
+    </div>
+
+    <!-- MODAL DORKING -->
+    <div class="modal-overlay" id="dorkModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <div class="modal-icon">🔎</div>
+                <div>
+                    <div class="modal-title">Dorking Tool</div>
+                    <div class="modal-sub">Auto Generator · Multi Category</div>
+                </div>
+            </div>
+
+            <label class="modal-label">Target Domain</label>
+            <input type="text" class="modal-input" id="dorkTarget" placeholder="contoh: example.com"
+                onkeypress="if(event.key==='Enter') runDorking()">
+
+            <label class="modal-label">Filter Kategori</label>
+            <div class="tabs" style="grid-template-columns: repeat(4, 1fr);">
+                <button class="tab active" data-dorkcat="all" onclick="pickDorkCat(this, 'all')">All</button>
+                <button class="tab" data-dorkcat="sensitive" onclick="pickDorkCat(this, 'sensitive')">Sensitif</button>
+                <button class="tab" data-dorkcat="leak" onclick="pickDorkCat(this, 'leak')">Bocor</button>
+                <button class="tab" data-dorkcat="admin" onclick="pickDorkCat(this, 'admin')">Admin</button>
+            </div>
+
+            <button class="modal-btn primary" id="btnDorkRun" onclick="runDorking()">Dorking</button>
+
+            <div class="modal-result" id="dorkResult">
+                <div class="result-heading">Target</div>
+                <div class="result-row">
+                    <span class="result-label">Domain</span>
+                    <span class="result-value" id="dorkDomainOut">-</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">Total Dork</span>
+                    <span class="result-value" id="dorkCountOut">-</span>
+                </div>
+
+                <div class="result-heading" style="margin-top:14px;">📂 Kategori Dork</div>
+                <div id="dorkList"></div>
+
+                <div class="api-note">⚠️ Gunakan hanya untuk riset keamanan / website milik sendiri</div>
+            </div>
+
+            <button class="modal-btn secondary" onclick="closeModal('dorkModal')">✕ Tutup</button>
+        </div>
+    </div>
+
+    <!-- MODAL BREACH CHECK -->
+    <div class="modal-overlay" id="breachModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <div class="modal-icon">🛡️</div>
+                <div>
+                    <div class="modal-title">Data Breach Check</div>
+                    <div class="modal-sub">Email Leak Detection</div>
+                </div>
+            </div>
+
+            <label class="modal-label">Alamat Email</label>
+            <div class="hint">Cek apakah email pernah muncul di kebocoran data publik</div>
+            <input type="email" class="modal-input" id="breachEmail"
+                placeholder="nama@example.com"
+                onkeypress="if(event.key==='Enter') runBreachCheck()">
+
+            <button class="modal-btn primary" id="btnBreachCheck" onclick="runBreachCheck()">
+                🔍 Cek Kebocoran
+            </button>
+
+            <div class="modal-result" id="breachResult">
+                <div class="crawl-stats">
+                    <div class="stat-card">
+                        <span class="stat-num" id="breachStatCount">0</span>
+                        <span class="stat-label">Bocor</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-num" id="breachStatStatus">-</span>
+                        <span class="stat-label">Status</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-num" id="breachStatRisk">-</span>
+                        <span class="stat-label">Risiko</span>
+                    </div>
+                </div>
+
+                <div class="result-heading" style="margin-top:14px;">📋 Detail Kebocoran</div>
+                <div id="breachList"></div>
+
+                <div class="result-heading" style="margin-top:14px;">💡 Rekomendasi</div>
+                <div id="breachAdvice" style="font-family:'Rajdhani',sans-serif;font-size:0.78rem;line-height:1.7;color:var(--text-secondary);padding:6px 0;"></div>
+
+                <div class="api-note" id="breachStatus"></div>
+            </div>
+
+            <button class="modal-btn secondary" onclick="closeModal('breachModal')">✕ Tutup</button>
+        </div>
+    </div>
+
+    <!-- MODAL LING ANALYZER -->
+    <div class="modal-overlay" id="lingModal">
+        <div class="modal-box">
+            <div class="modal-header">
+                <div class="modal-icon">🔗</div>
+                <div>
+                    <div class="modal-title">Ling Analyzer</div>
+                    <div class="modal-sub">Link Threat Detector</div>
+                </div>
+            </div>
+
+            <label class="modal-label">URL / Tautan</label>
+            <div class="hint">Analisis tautan mencurigakan, phishing, shortlink, dll</div>
+            <input type="text" class="modal-input" id="lingInput"
+                placeholder="https://example.com atau bit.ly/xyz"
+                onkeypress="if(event.key==='Enter') runLingAnalyzer()">
+
+            <button class="modal-btn primary" id="btnLingRun" onclick="runLingAnalyzer()">
+                🔍 Analisis Tautan
+            </button>
+
+            <!-- BANNER SKOR -->
+            <div class="link-risk-banner" id="linkRiskBanner">
+                <div class="link-risk-level" id="linkRiskLevel">-</div>
+                <div class="link-risk-score">
+                    <span id="linkRiskScoreNum">0</span><small>/100</small>
+                </div>
+                <div class="link-risk-bar">
+                    <div class="link-risk-bar-fill" id="linkRiskBarFill"></div>
+                </div>
+                <div class="link-risk-label" id="linkRiskLabel">TINGKAT BAHAYA</div>
+            </div>
+
+            <!-- DETAIL HASIL -->
+            <div class="modal-result" id="lingResult">
+                <div class="result-heading">🔎 Detail Analisis</div>
+                <div id="lingDetailList"></div>
+
+                <div class="result-heading" style="margin-top:14px;">📋 Info URL</div>
+                <div class="result-row">
+                    <span class="result-label">Protocol</span>
+                    <span class="result-value" id="lingProtocol">-</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">Domain</span>
+                    <span class="result-value" id="lingDomain">-</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">TLD</span>
+                    <span class="result-value" id="lingTld">-</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">Path</span>
+                    <span class="result-value" id="lingPath">-</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">Panjang URL</span>
+                    <span class="result-value" id="lingLength">-</span>
+                </div>
+
+                <div class="api-note">⚠️ Hasil bersifat heuristik, tidak 100% akurat</div>
+            </div>
+
+            <button class="modal-btn secondary" onclick="closeModal('lingModal')">✕ Tutup</button>
+        </div>
+    </div>
+
+    <script>
+    // ============================================================
+    //  IP LOOKUP SYSTEM
+    // ============================================================
+    const IP_APIS = [
+        {
+            name: 'ipwho.is',
+            build: (q) => `https://ipwho.is/${q}`,
+            parse: (d) => ({
+                ip: d.ip, version: d.type === 'IPv6' ? 6 : 4,
+                country_name: d.country, country_flag_emoji: d.flag?.emoji || '',
+                region: d.region, city: d.city, postal: d.postal,
+                latitude: d.latitude, longitude: d.longitude, timezone: d.timezone?.id,
+                org: d.connection?.isp || d.connection?.org,
+                asn: d.connection?.asn ? 'AS' + d.connection.asn : null,
+                currency: d.currency?.code, currency_name: d.currency?.name, hostname: null,
+            })
+        },
+        {
+            name: 'ip-api.com',
+            build: (q) => `http://ip-api.com/json/${q}?fields=status,message,country,regionName,city,zip,lat,lon,timezone,isp,org,as,query`,
+            parse: (d) => ({
+                ip: d.query, version: d.query?.includes(':') ? 6 : 4,
+                country_name: d.country, country_flag_emoji: '',
+                region: d.regionName, city: d.city, postal: d.zip,
+                latitude: d.lat, longitude: d.lon, timezone: d.timezone,
+                org: d.isp, asn: d.as, currency: null, currency_name: null, hostname: null,
+            })
+        },
+        {
+            name: 'ipapi.co',
+            build: (q) => `https://ipapi.co/${q}/json/`,
+            parse: (d) => ({
+                ip: d.ip, version: d.version,
+                country_name: d.country_name, country_flag_emoji: d.country_flag_emoji || '',
+                region: d.region, city: d.city, postal: d.postal,
+                latitude: d.latitude, longitude: d.longitude, timezone: d.timezone,
+                org: d.org, asn: d.asn, currency: d.currency, currency_name: d.currency_name,
+                hostname: d.hostname,
+            })
+        }
+    ];
+
+    const CRAWL_PROXIES = [
+        { name: 'allorigins', build: (u) => `https://api.allorigins.win/get?url=${encodeURIComponent(u)}`, parse: (d) => d.contents },
+        { name: 'allorigins-raw', build: (u) => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`, parse: (d) => d },
+        { name: 'corsproxy', build: (u) => `https://corsproxy.io/?${encodeURIComponent(u)}`, parse: (d) => d },
+        { name: 'thingproxy', build: (u) => `https://thingproxy.freeboard.io/fetch/${u}`, parse: (d) => d },
+    ];
+
+    async function fetchIpData(query) {
+        let lastError = null;
+        for (const api of IP_APIS) {
+            try {
+                const controller = new AbortController();
+                const timeout = setTimeout(() => controller.abort(), 8000);
+                const res = await fetch(api.build(query), { signal: controller.signal });
+                clearTimeout(timeout);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+                if (data.success === false) throw new Error(data.message || 'API error');
+                if (data.status === 'fail') throw new Error(data.message || 'API error');
+                if (data.error) throw new Error(data.reason || 'API error');
+                const parsed = api.parse(data);
+                if (!parsed.ip) throw new Error('Data tidak lengkap');
+                return { data: parsed, source: api.name };
+            } catch (err) {
+                lastError = err;
+                continue;
+            }
+        }
+        throw new Error('Semua API gagal: ' + (lastError?.message || 'Unknown'));
+    }
+
+    async function fetchWithProxy(url) {
+        let lastError = null;
+        for (const proxy of CRAWL_PROXIES) {
+            try {
+                const controller = new AbortController();
+                const timeout = setTimeout(() => controller.abort(), 15000);
+                const res = await fetch(proxy.build(url), { signal: controller.signal });
+                clearTimeout(timeout);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                let data;
+                if (proxy.name.includes('raw') || proxy.name === 'corsproxy' || proxy.name === 'thingproxy') {
+                    data = await res.text();
+                } else {
+                    data = await res.json();
+                    data = proxy.parse(data);
+                }
+                if (!data || data.length < 50) throw new Error('Konten kosong');
+                return { html: data, source: proxy.name };
+            } catch (err) {
+                lastError = err;
+                continue;
+            }
+        }
+        throw new Error('Semua proxy gagal: ' + (lastError?.message || 'Unknown'));
+    }
+
+    // ============================================================
+    //  NAVIGASI
+    // ============================================================
+    function goToDashboard() {
+        const startPage = document.getElementById('startPage');
+        const dashboardPage = document.getElementById('dashboardPage');
+        startPage.classList.add('leaving');
+        setTimeout(() => {
+            startPage.classList.remove('active', 'leaving');
+            dashboardPage.classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            trackIP();
+        }, 400);
+    }
+
+    function goToStart(event) {
+        event.preventDefault();
+        stopMusic();
+        const startPage = document.getElementById('startPage');
+        const dashboardPage = document.getElementById('dashboardPage');
+        dashboardPage.classList.add('leaving');
+        setTimeout(() => {
+            dashboardPage.classList.remove('active', 'leaving');
+            startPage.classList.add('active');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }, 400);
+    }
+
+    async function trackIP() {
+        const ipEl = document.getElementById('ipAddress');
+        const locEl = document.getElementById('location');
+        const ispEl = document.getElementById('isp');
+        try {
+            const { data } = await fetchIpData('');
+            ipEl.textContent = data.ip || 'Tidak diketahui';
+            const city = data.city || '';
+            const region = data.region || '';
+            const country = data.country_name || '';
+            locEl.textContent = [city, region, country].filter(Boolean).join(', ') || 'Tidak diketahui';
+            ispEl.textContent = data.org || data.asn || 'Tidak diketahui';
+        } catch (error) {
+            ipEl.textContent = 'Gagal melacak';
+            locEl.textContent = 'Gagal melacak';
+            ispEl.textContent = 'Gagal melacak';
+        }
+    }
+
+    // ============================================================
+    //  MUSIC PLAYER
+    // ============================================================
+    const bgMusic = document.getElementById('bgMusic');
+    const btnPlay = document.getElementById('btnPlay');
+    const btnStop = document.getElementById('btnStop');
+    const statusText = document.getElementById('statusText');
+    const equalizer = document.getElementById('equalizer');
+
+    function playMusic() {
+        bgMusic.volume = 0.7;
+        bgMusic.play().then(() => {
+            statusText.textContent = 'playing...';
+            statusText.classList.add('playing');
+            btnPlay.classList.add('active');
+            btnStop.classList.remove('active');
+            equalizer.classList.add('active');
+        }).catch(err => { statusText.textContent = 'error'; });
+    }
+
+    function stopMusic() {
+        bgMusic.pause();
+        bgMusic.currentTime = 0;
+        statusText.textContent = 'stopped';
+        statusText.classList.remove('playing');
+        btnStop.classList.add('active');
+        btnPlay.classList.remove('active');
+        equalizer.classList.remove('active');
+    }
+
+    function openModal(id) { document.getElementById(id).classList.add('active'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+    document.querySelectorAll('.modal-overlay').forEach(modal => {
+        modal.addEventListener('click', function(e) {
+            if (e.target === this) this.classList.remove('active');
+        });
+    });
+
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && document.getElementById('startPage').classList.contains('active')) {
+            goToDashboard();
+        }
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('active'));
+        }
+    });
+
+    // ============================================================
+    //  DATABASE WHATSAPP OSINT — DIAL CODE + MCC/MNC GLOBAL
+    // ============================================================
+    const DIAL_CODE_DB = {
+        '1':   { negara: 'United States / Canada', iso: 'US/CA', tz: 'America/New_York', len: [10], mcc: '310' },
+        '7':   { negara: 'Russia / Kazakhstan', iso: 'RU/KZ', tz: 'Europe/Moscow', len: [10], mcc: '250' },
+        '20':  { negara: 'Egypt', iso: 'EG', tz: 'Africa/Cairo', len: [10], mcc: '602' },
+        '27':  { negara: 'South Africa', iso: 'ZA', tz: 'Africa/Johannesburg', len: [9], mcc: '655' },
+        '30':  { negara: 'Greece', iso: 'GR', tz: 'Europe/Athens', len: [10], mcc: '202' },
+        '31':  { negara: 'Netherlands', iso: 'NL', tz: 'Europe/Amsterdam', len: [9], mcc: '204' },
+        '32':  { negara: 'Belgium', iso: 'BE', tz: 'Europe/Brussels', len: [9], mcc: '206' },
+        '33':  { negara: 'France', iso: 'FR', tz: 'Europe/Paris', len: [9], mcc: '208' },
+        '34':  { negara: 'Spain', iso: 'ES', tz: 'Europe/Madrid', len: [9], mcc: '214' },
+        '36':  { negara: 'Hungary', iso: 'HU', tz: 'Europe/Budapest', len: [9], mcc: '216' },
+        '39':  { negara: 'Italy', iso: 'IT', tz: 'Europe/Rome', len: [10], mcc: '222' },
+        '40':  { negara: 'Romania', iso: 'RO', tz: 'Europe/Bucharest', len: [9], mcc: '226' },
+        '41':  { negara: 'Switzerland', iso: 'CH', tz: 'Europe/Zurich', len: [9], mcc: '228' },
+        '43':  { negara: 'Austria', iso: 'AT', tz: 'Europe/Vienna', len: [10], mcc: '232' },
+        '44':  { negara: 'United Kingdom', iso: 'GB', tz: 'Europe/London', len: [10], mcc: '234' },
+        '45':  { negara: 'Denmark', iso: 'DK', tz: 'Europe/Copenhagen', len: [8], mcc: '238' },
+        '46':  { negara: 'Sweden', iso: 'SE', tz: 'Europe/Stockholm', len: [9], mcc: '240' },
+        '47':  { negara: 'Norway', iso: 'NO', tz: 'Europe/Oslo', len: [8], mcc: '242' },
+        '48':  { negara: 'Poland', iso: 'PL', tz: 'Europe/Warsaw', len: [9], mcc: '260' },
+        '49':  { negara: 'Germany', iso: 'DE', tz: 'Europe/Berlin', len: [10], mcc: '262' },
+        '51':  { negara: 'Peru', iso: 'PE', tz: 'America/Lima', len: [9], mcc: '716' },
+        '52':  { negara: 'Mexico', iso: 'MX', tz: 'America/Mexico_City', len: [10], mcc: '334' },
+        '54':  { negara: 'Argentina', iso: 'AR', tz: 'America/Argentina/Buenos_Aires', len: [10], mcc: '722' },
+        '55':  { negara: 'Brazil', iso: 'BR', tz: 'America/Sao_Paulo', len: [11], mcc: '724' },
+        '56':  { negara: 'Chile', iso: 'CL', tz: 'America/Santiago', len: [9], mcc: '730' },
+        '57':  { negara: 'Colombia', iso: 'CO', tz: 'America/Bogota', len: [10], mcc: '732' },
+        '58':  { negara: 'Venezuela', iso: 'VE', tz: 'America/Caracas', len: [10], mcc: '734' },
+        '60':  { negara: 'Malaysia', iso: 'MY', tz: 'Asia/Kuala_Lumpur', len: [9, 10], mcc: '502' },
+        '61':  { negara: 'Australia', iso: 'AU', tz: 'Australia/Sydney', len: [9], mcc: '505' },
+        '62':  { negara: 'Indonesia', iso: 'ID', tz: 'Asia/Jakarta', len: [9, 10, 11, 12], mcc: '510' },
+        '63':  { negara: 'Philippines', iso: 'PH', tz: 'Asia/Manila', len: [10], mcc: '515' },
+        '64':  { negara: 'New Zealand', iso: 'NZ', tz: 'Pacific/Auckland', len: [8, 9], mcc: '530' },
+        '65':  { negara: 'Singapore', iso: 'SG', tz: 'Asia/Singapore', len: [8], mcc: '525' },
+        '66':  { negara: 'Thailand', iso: 'TH', tz: 'Asia/Bangkok', len: [9], mcc: '520' },
+        '81':  { negara: 'Japan', iso: 'JP', tz: 'Asia/Tokyo', len: [10], mcc: '440' },
+        '82':  { negara: 'South Korea', iso: 'KR', tz: 'Asia/Seoul', len: [9, 10], mcc: '450' },
+        '84':  { negara: 'Vietnam', iso: 'VN', tz: 'Asia/Ho_Chi_Minh', len: [9], mcc: '452' },
+        '86':  { negara: 'China', iso: 'CN', tz: 'Asia/Shanghai', len: [11], mcc: '460' },
+        '90':  { negara: 'Turkey', iso: 'TR', tz: 'Europe/Istanbul', len: [10], mcc: '286' },
+        '91':  { negara: 'India', iso: 'IN', tz: 'Asia/Kolkata', len: [10], mcc: '404' },
+        '92':  { negara: 'Pakistan', iso: 'PK', tz: 'Asia/Karachi', len: [10], mcc: '410' },
+        '93':  { negara: 'Afghanistan', iso: 'AF', tz: 'Asia/Kabul', len: [9], mcc: '412' },
+        '94':  { negara: 'Sri Lanka', iso: 'LK', tz: 'Asia/Colombo', len: [9], mcc: '413' },
+        '95':  { negara: 'Myanmar', iso: 'MM', tz: 'Asia/Yangon', len: [9], mcc: '414' },
+        '98':  { negara: 'Iran', iso: 'IR', tz: 'Asia/Tehran', len: [10], mcc: '432' },
+        '212': { negara: 'Morocco', iso: 'MA', tz: 'Africa/Casablanca', len: [9], mcc: '604' },
+        '213': { negara: 'Algeria', iso: 'DZ', tz: 'Africa/Algiers', len: [9], mcc: '603' },
+        '216': { negara: 'Tunisia', iso: 'TN', tz: 'Africa/Tunis', len: [8], mcc: '605' },
+        '218': { negara: 'Libya', iso: 'LY', tz: 'Africa/Tripoli', len: [9], mcc: '606' },
+        '233': { negara: 'Ghana', iso: 'GH', tz: 'Africa/Accra', len: [9], mcc: '620' },
+        '234': { negara: 'Nigeria', iso: 'NG', tz: 'Africa/Lagos', len: [10], mcc: '621' },
+        '254': { negara: 'Kenya', iso: 'KE', tz: 'Africa/Nairobi', len: [9], mcc: '639' },
+        '351': { negara: 'Portugal', iso: 'PT', tz: 'Europe/Lisbon', len: [9], mcc: '268' },
+        '352': { negara: 'Luxembourg', iso: 'LU', tz: 'Europe/Luxembourg', len: [9], mcc: '270' },
+        '353': { negara: 'Ireland', iso: 'IE', tz: 'Europe/Dublin', len: [9], mcc: '272' },
+        '354': { negara: 'Iceland', iso: 'IS', tz: 'Atlantic/Reykjavik', len: [7], mcc: '274' },
+        '355': { negara: 'Albania', iso: 'AL', tz: 'Europe/Tirane', len: [9], mcc: '276' },
+        '356': { negara: 'Malta', iso: 'MT', tz: 'Europe/Malta', len: [8], mcc: '278' },
+        '357': { negara: 'Cyprus', iso: 'CY', tz: 'Asia/Nicosia', len: [8], mcc: '280' },
+        '358': { negara: 'Finland', iso: 'FI', tz: 'Europe/Helsinki', len: [9, 10], mcc: '244' },
+        '359': { negara: 'Bulgaria', iso: 'BG', tz: 'Europe/Sofia', len: [9], mcc: '284' },
+        '370': { negara: 'Lithuania', iso: 'LT', tz: 'Europe/Vilnius', len: [8], mcc: '246' },
+        '371': { negara: 'Latvia', iso: 'LV', tz: 'Europe/Riga', len: [8], mcc: '247' },
+        '372': { negara: 'Estonia', iso: 'EE', tz: 'Europe/Tallinn', len: [8], mcc: '248' },
+        '373': { negara: 'Moldova', iso: 'MD', tz: 'Europe/Chisinau', len: [8], mcc: '259' },
+        '374': { negara: 'Armenia', iso: 'AM', tz: 'Asia/Yerevan', len: [8], mcc: '283' },
+        '375': { negara: 'Belarus', iso: 'BY', tz: 'Europe/Minsk', len: [9], mcc: '257' },
+        '376': { negara: 'Andorra', iso: 'AD', tz: 'Europe/Andorra', len: [6, 9], mcc: '213' },
+        '380': { negara: 'Ukraine', iso: 'UA', tz: 'Europe/Kiev', len: [9], mcc: '255' },
+        '381': { negara: 'Serbia', iso: 'RS', tz: 'Europe/Belgrade', len: [9], mcc: '220' },
+        '385': { negara: 'Croatia', iso: 'HR', tz: 'Europe/Zagreb', len: [9], mcc: '219' },
+        '386': { negara: 'Slovenia', iso: 'SI', tz: 'Europe/Ljubljana', len: [8], mcc: '293' },
+        '387': { negara: 'Bosnia and Herzegovina', iso: 'BA', tz: 'Europe/Sarajevo', len: [8], mcc: '218' },
+        '389': { negara: 'North Macedonia', iso: 'MK', tz: 'Europe/Skopje', len: [8], mcc: '294' },
+        '420': { negara: 'Czech Republic', iso: 'CZ', tz: 'Europe/Prague', len: [9], mcc: '230' },
+        '421': { negara: 'Slovakia', iso: 'SK', tz: 'Europe/Bratislava', len: [9], mcc: '231' },
+        '423': { negara: 'Liechtenstein', iso: 'LI', tz: 'Europe/Vaduz', len: [7], mcc: '295' },
+        '501': { negara: 'Belize', iso: 'BZ', tz: 'America/Belize', len: [7], mcc: '702' },
+        '502': { negara: 'Guatemala', iso: 'GT', tz: 'America/Guatemala', len: [8], mcc: '704' },
+        '503': { negara: 'El Salvador', iso: 'SV', tz: 'America/El_Salvador', len: [8], mcc: '706' },
+        '504': { negara: 'Honduras', iso: 'HN', tz: 'America/Tegucigalpa', len: [8], mcc: '708' },
+        '505': { negara: 'Nicaragua', iso: 'NI', tz: 'America/Managua', len: [8], mcc: '710' },
+        '506': { negara: 'Costa Rica', iso: 'CR', tz: 'America/Costa_Rica', len: [8], mcc: '712' },
+        '507': { negara: 'Panama', iso: 'PA', tz: 'America/Panama', len: [8], mcc: '714' },
+        '509': { negara: 'Haiti', iso: 'HT', tz: 'America/Port-au-Prince', len: [8], mcc: '372' },
+        '591': { negara: 'Bolivia', iso: 'BO', tz: 'America/La_Paz', len: [8], mcc: '736' },
+        '592': { negara: 'Guyana', iso: 'GY', tz: 'America/Guyana', len: [7], mcc: '738' },
+        '593': { negara: 'Ecuador', iso: 'EC', tz: 'America/Guayaquil', len: [9], mcc: '740' },
+        '595': { negara: 'Paraguay', iso: 'PY', tz: 'America/Asuncion', len: [9], mcc: '744' },
+        '598': { negara: 'Uruguay', iso: 'UY', tz: 'America/Montevideo', len: [8], mcc: '748' },
+        '673': { negara: 'Brunei', iso: 'BN', tz: 'Asia/Brunei', len: [7], mcc: '528' },
+        '855': { negara: 'Cambodia', iso: 'KH', tz: 'Asia/Phnom_Penh', len: [8, 9], mcc: '456' },
+        '856': { negara: 'Laos', iso: 'LA', tz: 'Asia/Vientiane', len: [9, 10], mcc: '457' },
+        '880': { negara: 'Bangladesh', iso: 'BD', tz: 'Asia/Dhaka', len: [10], mcc: '470' },
+        '886': { negara: 'Taiwan', iso: 'TW', tz: 'Asia/Taipei', len: [9], mcc: '466' },
+        '960': { negara: 'Maldives', iso: 'MV', tz: 'Indian/Maldives', len: [7], mcc: '472' },
+        '961': { negara: 'Lebanon', iso: 'LB', tz: 'Asia/Beirut', len: [7, 8], mcc: '415' },
+        '962': { negara: 'Jordan', iso: 'JO', tz: 'Asia/Amman', len: [9], mcc: '416' },
+        '963': { negara: 'Syria', iso: 'SY', tz: 'Asia/Damascus', len: [9], mcc: '417' },
+        '964': { negara: 'Iraq', iso: 'IQ', tz: 'Asia/Baghdad', len: [10], mcc: '418' },
+        '965': { negara: 'Kuwait', iso: 'KW', tz: 'Asia/Kuwait', len: [8], mcc: '419' },
+        '966': { negara: 'Saudi Arabia', iso: 'SA', tz: 'Asia/Riyadh', len: [9], mcc: '420' },
+        '967': { negara: 'Yemen', iso: 'YE', tz: 'Asia/Aden', len: [9], mcc: '421' },
+        '968': { negara: 'Oman', iso: 'OM', tz: 'Asia/Muscat', len: [8], mcc: '422' },
+        '971': { negara: 'United Arab Emirates', iso: 'AE', tz: 'Asia/Dubai', len: [9], mcc: '424' },
+        '972': { negara: 'Israel', iso: 'IL', tz: 'Asia/Jerusalem', len: [9], mcc: '425' },
+        '973': { negara: 'Bahrain', iso: 'BH', tz: 'Asia/Bahrain', len: [8], mcc: '426' },
+        '974': { negara: 'Qatar', iso: 'QA', tz: 'Asia/Qatar', len: [8], mcc: '427' },
+        '975': { negara: 'Bhutan', iso: 'BT', tz: 'Asia/Thimphu', len: [8], mcc: '402' },
+        '976': { negara: 'Mongolia', iso: 'MN', tz: 'Asia/Ulaanbaatar', len: [8], mcc: '428' },
+        '977': { negara: 'Nepal', iso: 'NP', tz: 'Asia/Kathmandu', len: [10], mcc: '429' },
+        '992': { negara: 'Tajikistan', iso: 'TJ', tz: 'Asia/Dushanbe', len: [9], mcc: '436' },
+        '993': { negara: 'Turkmenistan', iso: 'TM', tz: 'Asia/Ashgabat', len: [8], mcc: '438' },
+        '994': { negara: 'Azerbaijan', iso: 'AZ', tz: 'Asia/Baku', len: [9], mcc: '400' },
+        '995': { negara: 'Georgia', iso: 'GE', tz: 'Asia/Tbilisi', len: [9], mcc: '282' },
+        '996': { negara: 'Kyrgyzstan', iso: 'KG', tz: 'Asia/Bishkek', len: [9], mcc: '437' },
+        '998': { negara: 'Uzbekistan', iso: 'UZ', tz: 'Asia/Tashkent', len: [9], mcc: '434' },
+    };
+
+    const MCC_MNC_DB = {
+        '510': {
+            '00': { brand: 'PSN', operator: 'PT Pasifik Satelit Nusantara', status: 'Operational' },
+            '01': { brand: 'Indosat', operator: 'Indosat Ooredoo', status: 'Operational' },
+            '08': { brand: 'AXIS', operator: 'XL Axiata', status: 'Operational' },
+            '09': { brand: 'Smartfren', operator: 'Smartfren Telecom', status: 'Operational' },
+            '10': { brand: 'Telkomsel', operator: 'Telkomsel', status: 'Operational' },
+            '11': { brand: 'XL', operator: 'XL Axiata', status: 'Operational' },
+            '21': { brand: 'IM3', operator: 'Indosat Ooredoo', status: 'Operational' },
+            '89': { brand: 'Tri (3)', operator: 'Tri Indonesia', status: 'Operational' },
+        },
+        '404': {
+            '02': { brand: 'Airtel', operator: 'Bharti Airtel', status: 'Operational' },
+            '10': { brand: 'Airtel', operator: 'Bharti Airtel', status: 'Operational' },
+            '11': { brand: 'Vodafone', operator: 'Vodafone India', status: 'Operational' },
+            '20': { brand: 'Vodafone', operator: 'Vodafone India', status: 'Operational' },
+            '22': { brand: 'Idea', operator: 'Idea Cellular', status: 'Operational' },
+            '31': { brand: 'Airtel', operator: 'Bharti Airtel', status: 'Operational' },
+            '34': { brand: 'BSNL', operator: 'BSNL', status: 'Operational' },
+            '70': { brand: 'Airtel', operator: 'Bharti Airtel', status: 'Operational' },
+            '84': { brand: 'Vodafone', operator: 'Vodafone India', status: 'Operational' },
+            '90': { brand: 'Airtel', operator: 'Bharti Airtel', status: 'Operational' },
+        },
+        '460': {
+            '00': { brand: 'China Mobile', operator: 'China Mobile', status: 'Operational' },
+            '01': { brand: 'China Unicom', operator: 'China Unicom', status: 'Operational' },
+            '03': { brand: 'China Telecom', operator: 'China Telecom', status: 'Operational' },
+            '07': { brand: 'China Mobile', operator: 'China Mobile', status: 'Operational' },
+        },
+        '440': {
+            '01': { brand: 'NTT docomo', operator: 'NTT docomo', status: 'Operational' },
+            '04': { brand: 'SoftBank', operator: 'SoftBank', status: 'Operational' },
+            '07': { brand: 'KDDI', operator: 'KDDI', status: 'Operational' },
+            '20': { brand: 'SoftBank', operator: 'SoftBank', status: 'Operational' },
+            '50': { brand: 'KDDI', operator: 'KDDI', status: 'Operational' },
+        },
+        '450': {
+            '05': { brand: 'SKTelecom', operator: 'SK Telecom', status: 'Operational' },
+            '06': { brand: 'LG U+', operator: 'LG U+', status: 'Operational' },
+            '08': { brand: 'KT', operator: 'KT', status: 'Operational' },
+        },
+        '502': {
+            '12': { brand: 'Maxis', operator: 'Maxis', status: 'Operational' },
+            '13': { brand: 'Celcom', operator: 'Celcom Axiata', status: 'Operational' },
+            '16': { brand: 'DiGi', operator: 'DiGi', status: 'Operational' },
+            '18': { brand: 'U Mobile', operator: 'U Mobile', status: 'Operational' },
+        },
+        '520': {
+            '01': { brand: 'AIS', operator: 'AIS', status: 'Operational' },
+            '04': { brand: 'TrueMove', operator: 'TrueMove', status: 'Operational' },
+            '05': { brand: 'DTAC', operator: 'DTAC', status: 'Operational' },
+            '99': { brand: 'TrueMove', operator: 'TrueMove', status: 'Operational' },
+        },
+        '515': {
+            '02': { brand: 'Globe', operator: 'Globe Telecom', status: 'Operational' },
+            '03': { brand: 'Smart', operator: 'Smart Communications', status: 'Operational' },
+            '05': { brand: 'Sun', operator: 'Sun Cellular', status: 'Operational' },
+        },
+        '452': {
+            '01': { brand: 'MobiFone', operator: 'MobiFone', status: 'Operational' },
+            '02': { brand: 'Vinaphone', operator: 'Vinaphone', status: 'Operational' },
+            '04': { brand: 'Viettel', operator: 'Viettel', status: 'Operational' },
+            '05': { brand: 'Vietnamobile', operator: 'Vietnamobile', status: 'Operational' },
+        },
+        '470': {
+            '01': { brand: 'Grameenphone', operator: 'Grameenphone', status: 'Operational' },
+            '02': { brand: 'Robi', operator: 'Robi Axiata', status: 'Operational' },
+            '03': { brand: 'Banglalink', operator: 'Banglalink', status: 'Operational' },
+            '04': { brand: 'Airtel', operator: 'Airtel Bangladesh', status: 'Operational' },
+        },
+        '410': {
+            '01': { brand: 'Jazz', operator: 'Pakistan Mobile', status: 'Operational' },
+            '03': { brand: 'Ufone', operator: 'PTCL', status: 'Operational' },
+            '04': { brand: 'Zong', operator: 'China Mobile Pakistan', status: 'Operational' },
+            '06': { brand: 'Telenor', operator: 'Telenor Pakistan', status: 'Operational' },
+        },
+        '413': {
+            '01': { brand: 'Mobitel', operator: 'Mobitel', status: 'Operational' },
+            '02': { brand: 'Dialog', operator: 'Dialog Axiata', status: 'Operational' },
+            '05': { brand: 'Airtel', operator: 'Bharti Airtel Lanka', status: 'Operational' },
+        },
+        '429': {
+            '01': { brand: 'Namaste', operator: 'NT Mobile', status: 'Operational' },
+            '02': { brand: 'Ncell', operator: 'Ncell', status: 'Operational' },
+            '03': { brand: 'SmartCell', operator: 'Smart Telecom', status: 'Operational' },
+        },
+        '262': {
+            '01': { brand: 'Telekom', operator: 'Telekom Deutschland', status: 'Operational' },
+            '02': { brand: 'Vodafone', operator: 'Vodafone', status: 'Operational' },
+            '03': { brand: 'O2', operator: 'Telefónica Germany', status: 'Operational' },
+        },
+        '234': {
+            '02': { brand: 'O2', operator: 'Telefónica UK', status: 'Operational' },
+            '06': { brand: 'Vodafone', operator: 'Vodafone UK', status: 'Operational' },
+            '10': { brand: 'O2', operator: 'Telefónica UK', status: 'Operational' },
+            '15': { brand: 'Vodafone', operator: 'Vodafone UK', status: 'Operational' },
+            '20': { brand: '3', operator: 'Hutchison 3G UK', status: 'Operational' },
+            '30': { brand: 'EE', operator: 'EE', status: 'Operational' },
+            '33': { brand: 'EE', operator: 'EE', status: 'Operational' },
+        },
+        '208': {
+            '01': { brand: 'Orange', operator: 'Orange', status: 'Operational' },
+            '09': { brand: 'SFR', operator: 'SFR', status: 'Operational' },
+            '10': { brand: 'SFR', operator: 'SFR', status: 'Operational' },
+            '15': { brand: 'Free', operator: 'Free Mobile', status: 'Operational' },
+            '20': { brand: 'Bouygues', operator: 'Bouygues Telecom', status: 'Operational' },
+        },
+        '222': {
+            '01': { brand: 'TIM', operator: 'TIM', status: 'Operational' },
+            '10': { brand: 'Vodafone', operator: 'Vodafone', status: 'Operational' },
+            '88': { brand: 'Wind', operator: 'Wind', status: 'Operational' },
+            '99': { brand: '3', operator: 'Hutchison 3G', status: 'Operational' },
+        },
+        '214': {
+            '01': { brand: 'Vodafone', operator: 'Vodafone', status: 'Operational' },
+            '03': { brand: 'Orange', operator: 'Orange', status: 'Operational' },
+            '04': { brand: 'Yoigo', operator: 'Yoigo', status: 'Operational' },
+            '05': { brand: 'Movistar', operator: 'Movistar', status: 'Operational' },
+            '07': { brand: 'Movistar', operator: 'Movistar', status: 'Operational' },
+        },
+        '204': {
+            '04': { brand: 'Vodafone', operator: 'Vodafone', status: 'Operational' },
+            '08': { brand: 'KPN', operator: 'KPN', status: 'Operational' },
+            '16': { brand: 'T-Mobile', operator: 'T-Mobile', status: 'Operational' },
+            '20': { brand: 'Orange', operator: 'Orange', status: 'Operational' },
+        },
+        '206': {
+            '01': { brand: 'Proximus', operator: 'Proximus', status: 'Operational' },
+            '10': { brand: 'Orange', operator: 'Orange', status: 'Operational' },
+            '20': { brand: 'Base', operator: 'Base', status: 'Operational' },
+        },
+        '228': {
+            '01': { brand: 'Swisscom', operator: 'Swisscom', status: 'Operational' },
+            '02': { brand: 'Sunrise', operator: 'Sunrise', status: 'Operational' },
+            '03': { brand: 'Salt', operator: 'Salt', status: 'Operational' },
+        },
+        '240': {
+            '01': { brand: 'Telia', operator: 'Telia', status: 'Operational' },
+            '02': { brand: '3', operator: 'Hutchison 3G', status: 'Operational' },
+            '04': { brand: 'Telenor', operator: 'Telenor', status: 'Operational' },
+            '05': { brand: 'Tele2', operator: 'Tele2', status: 'Operational' },
+        },
+        '242': {
+            '01': { brand: 'Telenor', operator: 'Telenor', status: 'Operational' },
+            '02': { brand: 'Telia', operator: 'Telia', status: 'Operational' },
+            '04': { brand: 'Tele2', operator: 'Tele2', status: 'Operational' },
+            '06': { brand: 'ice', operator: 'ice', status: 'Operational' },
+        },
+        '238': {
+            '01': { brand: 'TDC', operator: 'TDC', status: 'Operational' },
+            '02': { brand: 'Telenor', operator: 'Telenor', status: 'Operational' },
+            '06': { brand: 'Hi3G', operator: 'Hi3G', status: 'Operational' },
+            '20': { brand: 'Telia', operator: 'Telia', status: 'Operational' },
+        },
+        '244': {
+            '03': { brand: 'DNA', operator: 'DNA', status: 'Operational' },
+            '05': { brand: 'Elisa', operator: 'Elisa', status: 'Operational' },
+            '15': { brand: 'Telia', operator: 'Telia', status: 'Operational' },
+        },
+        '202': {
+            '01': { brand: 'Cosmote', operator: 'Cosmote', status: 'Operational' },
+            '05': { brand: 'Vodafone', operator: 'Vodafone', status: 'Operational' },
+            '10': { brand: 'Wind', operator: 'Wind Hellas', status: 'Operational' },
+        },
+        '286': {
+            '01': { brand: 'Turkcell', operator: 'Turkcell', status: 'Operational' },
+            '02': { brand: 'Vodafone', operator: 'Vodafone', status: 'Operational' },
+            '03': { brand: 'Türk Telekom', operator: 'Türk Telekom', status: 'Operational' },
+        },
+        '250': {
+            '01': { brand: 'MTS', operator: 'MTS', status: 'Operational' },
+            '02': { brand: 'Megafon', operator: 'Megafon', status: 'Operational' },
+            '20': { brand: 'Tele2', operator: 'Tele2', status: 'Operational' },
+            '99': { brand: 'Beeline', operator: 'Beeline', status: 'Operational' },
+        },
+        '255': {
+            '01': { brand: 'Vodafone', operator: 'Vodafone Ukraine', status: 'Operational' },
+            '03': { brand: 'Kyivstar', operator: 'Kyivstar', status: 'Operational' },
+            '06': { brand: 'life:)', operator: 'lifecell', status: 'Operational' },
+        },
+        '260': {
+            '01': { brand: 'Plus', operator: 'Polkomtel', status: 'Operational' },
+            '02': { brand: 'T-Mobile', operator: 'T-Mobile', status: 'Operational' },
+            '03': { brand: 'Orange', operator: 'Orange', status: 'Operational' },
+            '06': { brand: 'Play', operator: 'Play', status: 'Operational' },
+        },
+        '310': {
+            '004': { brand: 'Verizon', operator: 'Verizon Wireless', status: 'Operational' },
+            '010': { brand: 'Sprint', operator: 'Sprint', status: 'Operational' },
+            '030': { brand: 'AT&T', operator: 'AT&T Mobility', status: 'Operational' },
+            '120': { brand: 'Sprint', operator: 'Sprint', status: 'Operational' },
+            '150': { brand: 'AT&T', operator: 'AT&T Mobility', status: 'Operational' },
+            '160': { brand: 'T-Mobile', operator: 'T-Mobile USA', status: 'Operational' },
+            '260': { brand: 'T-Mobile', operator: 'T-Mobile USA', status: 'Operational' },
+            '410': { brand: 'AT&T', operator: 'AT&T Mobility', status: 'Operational' },
+            '660': { brand: 'MetroPCS', operator: 'MetroPCS', status: 'Operational' },
+        },
+        '302': {
+            '220': { brand: 'Telus', operator: 'Telus', status: 'Operational' },
+            '370': { brand: 'Fido', operator: 'Fido', status: 'Operational' },
+            '490': { brand: 'WIND', operator: 'WIND Mobile', status: 'Operational' },
+            '610': { brand: 'Bell', operator: 'Bell Mobility', status: 'Operational' },
+            '720': { brand: 'Rogers', operator: 'Rogers Wireless', status: 'Operational' },
+            '780': { brand: 'SaskTel', operator: 'SaskTel', status: 'Operational' },
+        },
+        '334': {
+            '020': { brand: 'Telcel', operator: 'Telcel', status: 'Operational' },
+            '030': { brand: 'Movistar', operator: 'Movistar', status: 'Operational' },
+            '050': { brand: 'AT&T', operator: 'AT&T Mexico', status: 'Operational' },
+        },
+        '724': {
+            '02': { brand: 'TIM', operator: 'TIM', status: 'Operational' },
+            '05': { brand: 'Claro', operator: 'Claro', status: 'Operational' },
+            '06': { brand: 'Vivo', operator: 'Vivo', status: 'Operational' },
+            '31': { brand: 'Oi', operator: 'Oi', status: 'Operational' },
+        },
+        '722': {
+            '010': { brand: 'Movistar', operator: 'Movistar', status: 'Operational' },
+            '030': { brand: 'Claro', operator: 'Claro', status: 'Operational' },
+            '040': { brand: 'Telecom', operator: 'Telecom Personal', status: 'Operational' },
+        },
+        '730': {
+            '01': { brand: 'entel', operator: 'Entel', status: 'Operational' },
+            '02': { brand: 'movistar', operator: 'Movistar', status: 'Operational' },
+            '03': { brand: 'Claro', operator: 'Claro', status: 'Operational' },
+            '04': { brand: 'WOM', operator: 'WOM', status: 'Operational' },
+        },
+        '732': {
+            '101': { brand: 'Claro', operator: 'Claro', status: 'Operational' },
+            '102': { brand: 'Movistar', operator: 'Movistar', status: 'Operational' },
+            '103': { brand: 'Tigo', operator: 'Tigo', status: 'Operational' },
+        },
+        '734': {
+            '04': { brand: 'Movistar', operator: 'Movistar', status: 'Operational' },
+            '06': { brand: 'Movilnet', operator: 'Movilnet', status: 'Operational' },
+        },
+        '716': {
+            '06': { brand: 'Movistar', operator: 'Movistar', status: 'Operational' },
+            '07': { brand: 'Entel', operator: 'Entel', status: 'Operational' },
+            '10': { brand: 'Claro', operator: 'Claro', status: 'Operational' },
+        },
+        '602': {
+            '01': { brand: 'Orange', operator: 'Orange', status: 'Operational' },
+            '02': { brand: 'Vodafone', operator: 'Vodafone', status: 'Operational' },
+            '03': { brand: 'Etisalat', operator: 'Etisalat', status: 'Operational' },
+        },
+        '655': {
+            '01': { brand: 'Vodacom', operator: 'Vodacom', status: 'Operational' },
+            '07': { brand: 'Cell C', operator: 'Cell C', status: 'Operational' },
+            '10': { brand: 'MTN', operator: 'MTN', status: 'Operational' },
+        },
+        '621': {
+            '20': { brand: 'Airtel', operator: 'Airtel Nigeria', status: 'Operational' },
+            '30': { brand: 'MTN', operator: 'MTN Nigeria', status: 'Operational' },
+            '50': { brand: 'Glo', operator: 'Globacom', status: 'Operational' },
+            '60': { brand: '9mobile', operator: '9mobile', status: 'Operational' },
+        },
+        '639': {
+            '02': { brand: 'Safaricom', operator: 'Safaricom', status: 'Operational' },
+            '03': { brand: 'Airtel', operator: 'Airtel Kenya', status: 'Operational' },
+            '07': { brand: 'Orange', operator: 'Orange Kenya', status: 'Operational' },
+        },
+        '604': {
+            '00': { brand: 'Orange', operator: 'Orange', status: 'Operational' },
+            '01': { brand: 'IAM', operator: 'Maroc Telecom', status: 'Operational' },
+            '02': { brand: 'INWI', operator: 'INWI', status: 'Operational' },
+        },
+        '603': {
+            '01': { brand: 'Mobilis', operator: 'Mobilis', status: 'Operational' },
+            '02': { brand: 'Djezzy', operator: 'Djezzy', status: 'Operational' },
+            '03': { brand: 'Ooredoo', operator: 'Ooredoo', status: 'Operational' },
+        },
+        '605': {
+            '01': { brand: 'Orange', operator: 'Orange', status: 'Operational' },
+            '02': { brand: 'Tunicell', operator: 'Tunicell', status: 'Operational' },
+            '03': { brand: 'Ooredoo', operator: 'Ooredoo', status: 'Operational' },
+        },
+        '505': {
+            '01': { brand: 'Telstra', operator: 'Telstra', status: 'Operational' },
+            '02': { brand: 'Optus', operator: 'Optus', status: 'Operational' },
+            '03': { brand: 'Vodafone', operator: 'Vodafone', status: 'Operational' },
+        },
+        '530': {
+            '01': { brand: 'Vodafone', operator: 'Vodafone', status: 'Operational' },
+            '02': { brand: 'Spark', operator: 'Spark', status: 'Operational' },
+            '24': { brand: '2degrees', operator: '2degrees', status: 'Operational' },
+        },
+        '425': {
+            '01': { brand: 'Partner', operator: 'Partner', status: 'Operational' },
+            '02': { brand: 'Cellcom', operator: 'Cellcom', status: 'Operational' },
+            '03': { brand: 'Pelephone', operator: 'Pelephone', status: 'Operational' },
+        },
+        '420': {
+            '01': { brand: 'Al Jawal', operator: 'Saudi Telecom', status: 'Operational' },
+            '03': { brand: 'Mobily', operator: 'Mobily', status: 'Operational' },
+            '04': { brand: 'Zain', operator: 'Zain Saudi', status: 'Operational' },
+        },
+        '424': {
+            '02': { brand: 'Etisalat', operator: 'Etisalat', status: 'Operational' },
+            '03': { brand: 'du', operator: 'du', status: 'Operational' },
+        },
+        '427': {
+            '01': { brand: 'Ooredoo', operator: 'Ooredoo', status: 'Operational' },
+            '02': { brand: 'Vodafone', operator: 'Vodafone', status: 'Operational' },
+        },
+        '426': {
+            '01': { brand: 'Batelco', operator: 'Batelco', status: 'Operational' },
+            '02': { brand: 'zain', operator: 'Zain Bahrain', status: 'Operational' },
+            '03': { brand: 'STC', operator: 'STC Bahrain', status: 'Operational' },
+        },
+        '419': {
+            '02': { brand: 'Zain', operator: 'Zain', status: 'Operational' },
+            '03': { brand: 'Ooredoo', operator: 'Ooredoo', status: 'Operational' },
+            '04': { brand: 'STC', operator: 'STC', status: 'Operational' },
+        },
+        '422': {
+            '02': { brand: 'Omantel', operator: 'Omantel', status: 'Operational' },
+            '03': { brand: 'Ooredoo', operator: 'Ooredoo', status: 'Operational' },
+        },
+        '416': {
+            '01': { brand: 'Zain', operator: 'Zain', status: 'Operational' },
+            '03': { brand: 'Umniah', operator: 'Umniah', status: 'Operational' },
+            '77': { brand: 'Orange', operator: 'Orange', status: 'Operational' },
+        },
+        '415': {
+            '01': { brand: 'Alfa', operator: 'Alfa', status: 'Operational' },
+            '03': { brand: 'touch', operator: 'touch', status: 'Operational' },
+        },
+        '418': {
+            '05': { brand: 'Asiacell', operator: 'Asiacell', status: 'Operational' },
+            '20': { brand: 'Zain', operator: 'Zain Iraq', status: 'Operational' },
+            '30': { brand: 'Korek', operator: 'Korek', status: 'Operational' },
+        },
+    };
+
+    const PREFIX_ID = {
+        '0811':'Telkomsel','0812':'Telkomsel','0813':'Telkomsel','0821':'Telkomsel',
+        '0822':'Telkomsel','0823':'Telkomsel','0851':'Telkomsel','0852':'Telkomsel',
+        '0853':'Telkomsel',
+        '0814':'Indosat Ooredoo','0815':'Indosat Ooredoo','0816':'Indosat Ooredoo',
+        '0855':'Indosat Ooredoo','0856':'Indosat Ooredoo','0857':'Indosat Ooredoo',
+        '0858':'Indosat Ooredoo',
+        '0817':'XL Axiata','0818':'XL Axiata','0819':'XL Axiata',
+        '0859':'XL Axiata','0877':'XL Axiata','0878':'XL Axiata',
+        '0831':'Axis','0832':'Axis','0833':'Axis','0838':'Axis',
+        '0895':'Tri (3)','0896':'Tri (3)','0897':'Tri (3)','0898':'Tri (3)',
+        '0899':'Tri (3)','0854':'Tri (3)',
+        '0881':'Smartfren','0882':'Smartfren','0883':'Smartfren',
+        '0884':'Smartfren','0885':'Smartfren','0886':'Smartfren',
+        '0887':'Smartfren','0888':'Smartfren','0889':'Smartfren',
+    };
+
+    const ALIAS_PROVIDER = {
+        'Telkomsel': 'Telkomsel (Simpati, Kartu As, Halo, by.U)',
+        'Indosat Ooredoo': 'Indosat Ooredoo (IM3, Matrix)',
+        'XL Axiata': 'XL Axiata (XL Prioritas, Xtra Combo)',
+        'Axis': 'Axis (XL Axiata)',
+        'Tri (3)': 'Tri (3) / Three',
+        'Smartfren': 'Smartfren',
+    };
+
+    // ============================================================
+    //  AUTO-DETECT DIAL CODE (PREFIX OTOMATIS)
+    // ============================================================
+    const DIAL_SORTED = Object.keys(DIAL_CODE_DB).sort((a, b) => b.length - a.length);
+
+    function autoDetectDial(inputValue) {
+        const prefixEl = document.getElementById('waPrefix');
+        if (!prefixEl) return;
+
+        let val = String(inputValue).trim();
+
+        if (!val) {
+            prefixEl.textContent = '+62';
+            prefixEl.title = 'Indonesia';
+            return;
+        }
+
+        if (val.startsWith('+')) {
+            const clean = val.replace(/[^0-9]/g, '');
+            for (const code of DIAL_SORTED) {
+                if (clean.startsWith(code)) {
+                    const info = DIAL_CODE_DB[code];
+                    prefixEl.textContent = `+${code}`;
+                    prefixEl.title = info.negara;
+                    return;
+                }
+            }
+            prefixEl.textContent = '+';
+            prefixEl.title = 'Unknown';
+            return;
+        }
+
+        const clean = val.replace(/[^0-9]/g, '');
+
+        if (clean.startsWith('0')) {
+            prefixEl.textContent = '+62';
+            prefixEl.title = 'Indonesia';
+            return;
+        }
+
+        if (clean.startsWith('8')) {
+            prefixEl.textContent = '+62';
+            prefixEl.title = 'Indonesia';
+            return;
+        }
+
+        for (const code of DIAL_SORTED) {
+            if (code === '62') continue;
+            if (code === '1' || code === '7') {
+                if (clean.startsWith(code) && clean.length >= code.length + 7) {
+                    const info = DIAL_CODE_DB[code];
+                    prefixEl.textContent = `+${code}`;
+                    prefixEl.title = info.negara;
+                    return;
+                }
+            } else if (clean.startsWith(code) && clean.length > code.length + 2) {
+                const info = DIAL_CODE_DB[code];
+                prefixEl.textContent = `+${code}`;
+                prefixEl.title = info.negara;
+                return;
+            }
+        }
+
+        prefixEl.textContent = '+62';
+        prefixEl.title = 'Indonesia';
+    }
+
+    // ============================================================
+    //  HELPER WHATSAPP
+    // ============================================================
+    function cleanNumber(n) { return String(n).replace(/[^0-9]/g, ''); }
+
+    function detectDialCode(clean) {
+        for (let len = 3; len >= 1; len--) {
+            const prefix = clean.slice(0, len);
+            if (DIAL_CODE_DB[prefix]) return { code: prefix, info: DIAL_CODE_DB[prefix] };
+        }
+        return null;
+    }
+
+    function normalizeNumber(nomor) {
+        let clean = cleanNumber(nomor);
+        const hasPlus = String(nomor).trim().startsWith('+');
+
+        if (clean.startsWith('0')) {
+            const national = clean.replace(/^0/, '');
+            return { dialCode: '62', national, e164: '62' + national };
+        }
+
+        if (clean.startsWith('62')) {
+            return { dialCode: '62', national: clean.slice(2), e164: clean };
+        }
+
+        if (clean.startsWith('8') && !hasPlus) {
+            return { dialCode: '62', national: clean, e164: '62' + clean };
+        }
+
+        const det = detectDialCode(clean);
+        if (det) {
+            return { dialCode: det.code, national: clean.slice(det.code.length), e164: clean };
+        }
+        return { dialCode: null, national: clean, e164: clean };
+    }
+
+    function validateLength(dialCode, national) {
+        const info = DIAL_CODE_DB[dialCode];
+        if (!info) return { valid: false, reason: 'Kode negara tidak dikenal' };
+        if (!info.len) return { valid: true, reason: 'Panjang tidak diverifikasi' };
+        const n = national.length;
+        const ok = info.len.includes(n);
+        return {
+            valid: ok,
+            reason: ok ? 'Format valid' : `Panjang ${n} digit (harus ${info.len.join('/')})`
+        };
+    }
+
+    function detectOperator(dialCode, national, negara) {
+        if (dialCode === '62') {
+            const n = national.startsWith('8') ? '0' + national : national;
+            const prefix4 = n.slice(0, 4);
+            const op = PREFIX_ID[prefix4];
+            if (op) return {
+                operator: op,
+                provider: ALIAS_PROVIDER[op] || op,
+                source: 'Prefix Lokal'
+            };
+        }
+
+        const info = DIAL_CODE_DB[dialCode];
+        const mcc = info?.mcc;
+        if (mcc && MCC_MNC_DB[mcc]) {
+            const ops = Object.entries(MCC_MNC_DB[mcc])
+                .filter(([_, o]) => o.status === 'Operational')
+                .map(([_, o]) => o.brand);
+            const unique = [...new Set(ops)];
+            if (unique.length) {
+                return {
+                    operator: unique.join(' / '),
+                    provider: `Operator ${negara} (${unique.length} tersedia)`,
+                    source: 'MCC/MNC Global'
+                };
+            }
+        }
+
+        return { operator: 'Tidak diketahui', provider: 'Data tidak tersedia', source: 'Unknown' };
+    }
+
+    function simpleHash(str) {
+        let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+        for (let i = 0; i < str.length; i++) {
+            const ch = str.charCodeAt(i);
+            h1 = Math.imul(h1 ^ ch, 2654435761);
+            h2 = Math.imul(h2 ^ ch, 1597334677);
+        }
+        h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+        h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+        return (h2 >>> 0).toString(16).padStart(8, '0') + (h1 >>> 0).toString(16).padStart(8, '0');
+    }
+
+    function crc32(str) {
+        let crc = 0xFFFFFFFF;
+        for (let i = 0; i < str.length; i++) {
+            crc ^= str.charCodeAt(i);
+            for (let j = 0; j < 8; j++) crc = (crc >>> 1) ^ (0xEDB88320 & -(crc & 1));
+        }
+        return ((crc ^ 0xFFFFFFFF) >>> 0).toString(16).toUpperCase().padStart(8, '0');
+    }
+
+    // ============================================================
+    //  WHATSAPP OSINT — MAIN
+    // ============================================================
+    async function runWaOsint() {
+        const input = document.getElementById('waNumber');
+        const btn = document.getElementById('btnWaCheck');
+        const resultBox = document.getElementById('waResult');
+        let raw = input.value.trim();
+
+        if (!raw || raw.replace(/[^0-9]/g, '').length < 7) {
+            alert('⚠️ Nomor tidak valid!');
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner"></span> Menganalisis...';
+        resultBox.classList.remove('show');
+
+        await new Promise(r => setTimeout(r, 900));
+
+        const { dialCode, national, e164 } = normalizeNumber(raw);
+        const info = dialCode ? DIAL_CODE_DB[dialCode] : null;
+
+        const negara = info?.negara || 'Tidak diketahui';
+        const iso = info?.iso || '-';
+        const timezone = info?.tz || '-';
+        const mcc = info?.mcc || '-';
+
+        const lenCheck = dialCode
+            ? validateLength(dialCode, national)
+            : { valid: false, reason: 'Kode negara tidak dikenali' };
+
+        const { operator, provider, source } = detectOperator(dialCode, national, negara);
+
+        const fullIntl = dialCode ? `+${dialCode}${national}` : `+${national}`;
+        const fullLocal = dialCode === '62' ? '0' + national : national;
+        const waLink = dialCode && national ? `https://wa.me/${dialCode}${national}` : `https://wa.me/${cleanNumber(raw)}`;
+
+        document.getElementById('resNumber').textContent = fullIntl;
+        document.getElementById('resNasional').textContent = fullLocal;
+        document.getElementById('resLokal').textContent = national.length >= 7
+            ? fullLocal.substring(0, 4) + '-' + fullLocal.substring(4, 8) + '-' + fullLocal.substring(8)
+            : fullLocal;
+        document.getElementById('resRaw').textContent = national;
+        document.getElementById('resCountry').textContent = `🌍 ${negara}`;
+        document.getElementById('resKodeNegara').textContent = `+${dialCode} (${iso})`;
+        document.getElementById('resPanjang').textContent = national.length + ' digit';
+
+        const statusEl = document.getElementById('resStatus');
+        if (lenCheck.valid) {
+            statusEl.textContent = '✅ ' + lenCheck.reason;
+            statusEl.className = 'result-value valid';
+        } else {
+            statusEl.textContent = '❌ ' + lenCheck.reason;
+            statusEl.className = 'result-value invalid';
+        }
+
+        document.getElementById('resOperator').textContent = operator;
+        document.getElementById('resPrefix').textContent = dialCode === '62' ? '0' + national.substring(0, 3) : national.substring(0, 3);
+        document.getElementById('resJaringan').textContent = lenCheck.valid ? 'GSM / WCDMA / LTE / 5G' : '-';
+        document.getElementById('resTipeKartu').textContent = provider;
+        document.getElementById('resGenerasi').textContent = source;
+
+        document.getElementById('resWilayah').textContent = negara;
+        document.getElementById('resZona').textContent = timezone;
+        document.getElementById('resUtc').textContent = timezone.includes('Jakarta') ? 'UTC+7'
+            : timezone.includes('Makassar') ? 'UTC+8'
+            : timezone.includes('Jayapura') ? 'UTC+9'
+            : 'Lihat timezone';
+        document.getElementById('resArea').textContent = dialCode === '62' ? '0' + national.substring(0, 3) : '-';
+
+        document.getElementById('resDigit1').textContent = national[0] || '-';
+        document.getElementById('resDigit3').textContent = national.substring(0, 3);
+        document.getElementById('resDigit4').textContent = national.substring(0, 4);
+        document.getElementById('resMiddle').textContent = national.substring(3, 10) || '-';
+        document.getElementById('resLast').textContent = national.slice(-4);
+        document.getElementById('resUnik').textContent = new Set(national.split('')).size + ' digit unik';
+
+        document.getElementById('resUmurNomor').textContent = `MCC/MNC: ${mcc}`;
+        document.getElementById('resTipeUser').textContent = lenCheck.valid ? 'Pribadi / Bisnis' : 'Tidak diketahui';
+        const peluang = lenCheck.valid ? (70 + Math.floor(Math.random() * 25)) : 20;
+        document.getElementById('resPeluang').textContent = peluang + '% (estimasi)';
+        document.getElementById('resRekomendasi').textContent = lenCheck.valid
+            ? '✅ Format valid, kemungkinan terdaftar'
+            : '❌ Format tidak valid, cek ulang';
+
+        document.getElementById('resE164').textContent = fullIntl;
+        document.getElementById('resRfc').textContent = `tel:+${dialCode}-${national}`;
+        document.getElementById('resMd5').textContent = simpleHash(fullIntl);
+        document.getElementById('resB64').textContent = btoa(fullIntl).substring(0, 30) + '...';
+        document.getElementById('resCrc').textContent = crc32(fullIntl);
+
+        document.getElementById('resWaMe').textContent = `wa.me/${dialCode}${national}`;
+        document.getElementById('resApiLink').textContent = `api.whatsapp.com/send?phone=${dialCode}${national}`;
+        document.getElementById('resQrLink').textContent = `wa.me/qr/...${national.slice(-6)}`;
+
+        document.getElementById('waLink').href = waLink + '?text=Halo';
+        resultBox.classList.add('show');
+        btn.disabled = false;
+        btn.innerHTML = 'Cek Nomor';
+    }
+
+    // ============================================================
+    //  IP LOOKUP FUNCTIONS
+    // ============================================================
+    function switchIpTab(tab) {
+        document.querySelectorAll('.tab[data-tab]').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(c => c.classList.remove('active'));
+        document.querySelector(`.tab[data-tab="${tab}"]`).classList.add('active');
+        document.getElementById(`tab-${tab}`).classList.add('active');
+        document.getElementById('ipResult').classList.remove('show');
+        document.getElementById('bulkResult').classList.remove('show');
+    }
+
+    function detectIpType(ip) {
+        const v4 = /^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/;
+        if (v4.test(ip)) {
+            const p = ip.split('.').map(Number);
+            if (p.some(n => n > 255)) return { valid: false };
+            if (p[0] === 127) return { valid: true, version: 4, category: 'Loopback', badge: 'loopback' };
+            if (p[0] === 10) return { valid: true, version: 4, category: 'Private (A)', badge: 'private' };
+            if (p[0] === 172 && p[1] >= 16 && p[1] <= 31) return { valid: true, version: 4, category: 'Private (B)', badge: 'private' };
+            if (p[0] === 192 && p[1] === 168) return { valid: true, version: 4, category: 'Private (C)', badge: 'private' };
+            if (p[0] === 169 && p[1] === 254) return { valid: true, version: 4, category: 'Link-Local', badge: 'private' };
+            if (p[0] >= 224 && p[0] <= 239) return { valid: true, version: 4, category: 'Multicast', badge: 'reserved' };
+            if (p[0] === 0) return { valid: true, version: 4, category: 'Reserved', badge: 'reserved' };
+            return { valid: true, version: 4, category: 'Public', badge: 'public' };
+        }
+        if (ip.includes(':')) {
+            const l = ip.toLowerCase();
+            if (l === '::1') return { valid: true, version: 6, category: 'Loopback', badge: 'loopback' };
+            if (l.startsWith('fe80')) return { valid: true, version: 6, category: 'Link-Local', badge: 'private' };
+            if (l.startsWith('fc') || l.startsWith('fd')) return { valid: true, version: 6, category: 'Unique Local', badge: 'private' };
+            if (l.startsWith('ff')) return { valid: true, version: 6, category: 'Multicast', badge: 'reserved' };
+            return { valid: true, version: 6, category: 'Public', badge: 'public' };
+        }
+        return { valid: false };
+    }
+
+    function validateIpInput(input) {
+        input = input.trim();
+        if (!input) return { valid: false };
+        const t = detectIpType(input);
+        if (t.valid) return { valid: true, isIp: true, typeInfo: t };
+        const d = /^[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?)+$/;
+        if (d.test(input)) return { valid: true, isIp: false };
+        return { valid: false };
+    }
+
+    async function runIpLookup() {
+        const btn = document.getElementById('btnIpCheck');
+        const resultBox = document.getElementById('ipResult');
+        const apiStatusEl = document.getElementById('apiStatus');
+        const query = document.getElementById('ipInput').value.trim();
+
+        if (!query) { alert('⚠️ Masukkan IP atau domain!'); return; }
+        const v = validateIpInput(query);
+        if (!v.valid) { alert('⚠️ Format tidak valid!'); return; }
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner"></span> Mencari...';
+        resultBox.classList.remove('show');
+        apiStatusEl.textContent = 'Mencoba beberapa API...';
+
+        try {
+            const { data, source } = await fetchIpData(query);
+            const typeInfo = v.isIp ? v.typeInfo : null;
+
+            document.getElementById('ipResIp').textContent = data.ip || query;
+            const ipTypeEl = document.getElementById('ipResIpType');
+            if (typeInfo) {
+                ipTypeEl.innerHTML = `<span class="ip-badge">${typeInfo.category}</span>`;
+                ipTypeEl.className = 'result-value';
+            } else {
+                ipTypeEl.textContent = 'Domain → ' + (data.ip || '');
+                ipTypeEl.className = 'result-value info';
+            }
+            document.getElementById('ipResVersion').textContent = data.version ? `IPv${data.version}` : '-';
+            document.getElementById('ipResCountry').textContent = `${data.country_flag_emoji || ''} ${data.country_name || '-'}`.trim();
+            document.getElementById('ipResRegion').textContent = data.region || '-';
+            document.getElementById('ipResCity').textContent = data.city || '-';
+            document.getElementById('ipResPostal').textContent = data.postal || '-';
+            document.getElementById('ipResLat').textContent = data.latitude || '-';
+            document.getElementById('ipResLon').textContent = data.longitude || '-';
+            document.getElementById('ipResTz').textContent = data.timezone || '-';
+            document.getElementById('ipResIsp').textContent = data.org || '-';
+            document.getElementById('ipResAsn').textContent = data.asn || '-';
+            document.getElementById('ipResCurrency').textContent = data.currency ? `${data.currency}${data.currency_name ? ' ('+data.currency_name+')' : ''}` : '-';
+            document.getElementById('ipResHostname').textContent = data.hostname || '-';
+            apiStatusEl.textContent = `✅ Sumber: ${source}`;
+            resultBox.classList.add('show');
+        } catch (error) {
+            apiStatusEl.textContent = '❌ ' + error.message;
+            alert('❌ Gagal: ' + error.message);
+        }
+        btn.disabled = false;
+        btn.innerHTML = 'Cari Data IP';
+    }
+
+    async function runBulkLookup() {
+        const textarea = document.getElementById('bulkIpInput');
+        const btn = document.getElementById('btnBulkCheck');
+        const resultBox = document.getElementById('bulkResult');
+        const listEl = document.getElementById('bulkResultList');
+        const lines = textarea.value.split('\n').map(l => l.trim()).filter(l => l);
+
+        if (!lines.length) { alert('⚠️ Masukkan minimal 1 IP!'); return; }
+        if (lines.length > 20) { alert('⚠️ Maksimal 20 IP!'); return; }
+
+        btn.disabled = true;
+        btn.innerHTML = `<span class="spinner"></span> ${lines.length} IP...`;
+        resultBox.classList.remove('show');
+        listEl.innerHTML = '';
+
+        let found = 0, errors = 0;
+        for (let i = 0; i < lines.length; i++) {
+            const ip = lines[i];
+            const item = document.createElement('div');
+            item.className = 'bulk-item';
+            item.innerHTML = `<span class="bulk-ip">${ip}</span><div class="bulk-info">⏳ Memuat...</div>`;
+            listEl.appendChild(item);
+
+            const v = validateIpInput(ip);
+            if (!v.valid) {
+                item.classList.add('error');
+                item.innerHTML = `<span class="bulk-ip">${ip}</span><div class="bulk-info" style="color:#f472b6;">❌ Format tidak valid</div>`;
+                errors++;
+                continue;
+            }
+            try {
+                const { data } = await fetchIpData(ip);
+                const t = v.isIp ? v.typeInfo : null;
+                item.innerHTML = `
+                    <span class="bulk-ip">${data.ip || ip}</span>
+                    <div class="bulk-info">
+                        <strong>Negara:</strong> ${data.country_flag_emoji || ''} ${data.country_name || '-'}<br>
+                        <strong>Kota:</strong> ${data.city || '-'}, ${data.region || '-'}<br>
+                        <strong>ISP:</strong> ${data.org || '-'}<br>
+                        <strong>ASN:</strong> ${data.asn || '-'}<br>
+                        <strong>Tipe:</strong> IPv${data.version || '?'} · ${t ? t.category : 'Public'}
+                    </div>`;
+                found++;
+            } catch (err) {
+                item.classList.add('error');
+                item.innerHTML = `<span class="bulk-ip">${ip}</span><div class="bulk-info" style="color:#f472b6;">❌ Gagal: ${err.message}</div>`;
+                errors++;
+            }
+            if (i < lines.length - 1) await new Promise(r => setTimeout(r, 200));
+        }
+        const header = document.createElement('div');
+        header.style.cssText = 'margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,0.1);font-size:0.7rem;color:#a0a0a0;font-family:"Share Tech Mono",monospace;';
+        header.innerHTML = `✅ <strong style="color:#d4d4d4;">${found}</strong> berhasil · ❌ <strong style="color:#f472b6;">${errors}</strong> gagal · Total: ${lines.length}`;
+        listEl.insertBefore(header, listEl.firstChild);
+        resultBox.classList.add('show');
+        btn.disabled = false;
+        btn.innerHTML = 'Cari Semua IP';
+    }
+
+    async function runMyIpLookup() {
+        const btn = document.getElementById('btnMyIp');
+        const resultBox = document.getElementById('ipResult');
+        const apiStatusEl = document.getElementById('apiStatus');
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner"></span> Mengambil...';
+        resultBox.classList.remove('show');
+        apiStatusEl.textContent = 'Mencoba beberapa API...';
+
+        try {
+            const { data, source } = await fetchIpData('');
+            const t = detectIpType(data.ip);
+            document.getElementById('ipResIp').textContent = data.ip;
+            const ipTypeEl = document.getElementById('ipResIpType');
+            ipTypeEl.innerHTML = `<span class="ip-badge">${t.category || 'Public'}</span>`;
+            ipTypeEl.className = 'result-value';
+            document.getElementById('ipResVersion').textContent = `IPv${data.version || 4}`;
+            document.getElementById('ipResCountry').textContent = `${data.country_flag_emoji || ''} ${data.country_name || '-'}`.trim();
+            document.getElementById('ipResRegion').textContent = data.region || '-';
+            document.getElementById('ipResCity').textContent = data.city || '-';
+            document.getElementById('ipResPostal').textContent = data.postal || '-';
+            document.getElementById('ipResLat').textContent = data.latitude || '-';
+            document.getElementById('ipResLon').textContent = data.longitude || '-';
+            document.getElementById('ipResTz').textContent = data.timezone || '-';
+            document.getElementById('ipResIsp').textContent = data.org || '-';
+            document.getElementById('ipResAsn').textContent = data.asn || '-';
+            document.getElementById('ipResCurrency').textContent = data.currency ? `${data.currency}${data.currency_name ? ' ('+data.currency_name+')' : ''}` : '-';
+            document.getElementById('ipResHostname').textContent = data.hostname || '-';
+            apiStatusEl.textContent = `✅ Sumber: ${source}`;
+            resultBox.classList.add('show');
+        } catch (error) {
+            apiStatusEl.textContent = '❌ ' + error.message;
+            alert('❌ Gagal: ' + error.message);
+        }
+        btn.disabled = false;
+        btn.innerHTML = 'Lihat IP Saya';
+    }
+
+    // ============================================================
+    //  EMAIL CRAWL
+    // ============================================================
+    async function runEmailCrawl() {
+        const input = document.getElementById('crawlUrl');
+        const btn = document.getElementById('btnEmailCrawl');
+        const resultBox = document.getElementById('emailResult');
+        const progressBar = document.getElementById('crawlProgress');
+        const progressFill = document.getElementById('crawlProgressFill');
+        const emailList = document.getElementById('emailList');
+        const crawlStatus = document.getElementById('crawlStatus');
+
+        let url = input.value.trim();
+        if (!url) { alert('⚠️ Masukkan URL!'); return; }
+        if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+        try { new URL(url); } catch (e) { alert('⚠️ URL tidak valid!'); return; }
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner"></span> Crawling...';
+        resultBox.classList.remove('show');
+        progressBar.classList.add('active');
+        progressFill.style.width = '0%';
+        crawlStatus.textContent = 'Mencoba beberapa proxy...';
+        document.getElementById('statEmail').textContent = '0';
+        document.getElementById('statDomain').textContent = '0';
+        document.getElementById('statStatus').textContent = '...';
+
+        emailList.innerHTML = `
+            <div style="text-align:center;color:#6e6e6e;font-size:0.78rem;padding:22px 10px;font-style:italic;">
+                <span style="font-size:1.8rem;display:block;margin-bottom:8px;opacity:0.5;">⏳</span>
+                Sedang crawling...
+            </div>`;
+
+        let progress = 0;
+        const pi = setInterval(() => {
+            progress += Math.random() * 15;
+            if (progress > 90) progress = 90;
+            progressFill.style.width = progress + '%';
+        }, 300);
+
+        try {
+            const { html, source } = await fetchWithProxy(url);
+            const regex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
+            const found = html.match(regex) || [];
+            const uniq = [...new Set(found.map(e => e.toLowerCase()))];
+            const valid = uniq.filter(email => {
+                if (email.length > 100) return false;
+                if (email.includes('..')) return false;
+                const d = email.split('@')[1];
+                if (['png','jpg','jpeg','gif','svg','webp','css','js'].some(x => d.endsWith(x))) return false;
+                return true;
+            });
+            const domains = new Set(valid.map(e => e.split('@')[1]));
+
+            clearInterval(pi);
+            progressFill.style.width = '100%';
+            await new Promise(r => setTimeout(r, 300));
+            progressBar.classList.remove('active');
+
+            document.getElementById('statEmail').textContent = valid.length;
+            document.getElementById('statDomain').textContent = domains.size;
+            document.getElementById('statStatus').textContent = '✅';
+            crawlStatus.textContent = `✅ ${source} · ${html.length.toLocaleString()} chars`;
+
+            emailList.innerHTML = '';
+            if (!valid.length) {
+                emailList.innerHTML = `
+                    <div style="text-align:center;color:#6e6e6e;font-size:0.78rem;padding:22px 10px;font-style:italic;">
+                        <span style="font-size:1.8rem;display:block;margin-bottom:8px;opacity:0.5;">📭</span>
+                        Tidak ada email ditemukan
+                    </div>`;
+            } else {
+                valid.sort().forEach(email => {
+                    const item = document.createElement('div');
+                    item.className = 'email-item';
+                    const span = document.createElement('span');
+                    span.textContent = email;
+                    const cp = document.createElement('button');
+                    cp.className = 'copy-btn';
+                    cp.textContent = 'COPY';
+                    cp.onclick = () => {
+                        navigator.clipboard.writeText(email).then(() => {
+                            cp.textContent = '✓ OK';
+                            setTimeout(() => cp.textContent = 'COPY', 1200);
+                        });
+                    };
+                    item.appendChild(span);
+                    item.appendChild(cp);
+                    emailList.appendChild(item);
+                });
+            }
+            resultBox.classList.add('show');
+        } catch (error) {
+            clearInterval(pi);
+            progressBar.classList.remove('active');
+            document.getElementById('statStatus').textContent = '❌';
+            crawlStatus.textContent = '❌ ' + error.message;
+            emailList.innerHTML = `
+                <div style="text-align:center;color:#f472b6;font-size:0.78rem;padding:22px 10px;font-style:italic;">
+                    <span style="font-size:1.8rem;display:block;margin-bottom:8px;opacity:0.7;">❌</span>
+                    Gagal: ${error.message}
+                </div>`;
+            resultBox.classList.add('show');
+        }
+        btn.disabled = false;
+        btn.innerHTML = 'Crawl Email';
+    }
+
+    // ============================================================
+    //  NIK DECODER
+    // ============================================================
+    const provinsiDB = {
+        '11':'Aceh','12':'Sumatera Utara','13':'Sumatera Barat','14':'Riau','15':'Jambi',
+        '16':'Sumatera Selatan','17':'Bengkulu','18':'Lampung','19':'Kep. Bangka Belitung',
+        '21':'Kep. Riau','31':'DKI Jakarta','32':'Jawa Barat','33':'Jawa Tengah',
+        '34':'DI Yogyakarta','35':'Jawa Timur','36':'Banten','51':'Bali',
+        '52':'Nusa Tenggara Barat','53':'Nusa Tenggara Timur','61':'Kalimantan Barat',
+        '62':'Kalimantan Tengah','63':'Kalimantan Selatan','64':'Kalimantan Timur',
+        '65':'Kalimantan Utara','71':'Sulawesi Utara','72':'Sulawesi Tengah',
+        '73':'Sulawesi Selatan','74':'Sulawesi Tenggara','75':'Gorontalo',
+        '76':'Sulawesi Barat','81':'Maluku','82':'Maluku Utara',
+        '91':'Papua','92':'Papua Barat','93':'Papua Selatan','94':'Papua Tengah',
+        '95':'Papua Pegunungan','96':'Papua Barat Daya'
+    };
+
+    const kabKotaDB = {
+        '3201':'Kab. Bogor','3202':'Kab. Sukabumi','3203':'Kab. Cianjur','3204':'Kab. Bandung',
+        '3205':'Kab. Garut','3206':'Kab. Tasikmalaya','3207':'Kab. Ciamis','3208':'Kab. Kuningan',
+        '3209':'Kab. Cirebon','3210':'Kab. Majalengka','3211':'Kab. Sumedang','3212':'Kab. Indramayu',
+        '3213':'Kab. Subang','3214':'Kab. Purwakarta','3215':'Kab. Karawang','3216':'Kab. Bekasi',
+        '3217':'Kab. Bandung Barat','3218':'Kab. Pangandaran','3271':'Kota Bogor','3272':'Kota Sukabumi',
+        '3273':'Kota Bandung','3274':'Kota Cirebon','3275':'Kota Bekasi','3276':'Kota Depok',
+        '3277':'Kota Cimahi','3278':'Kota Tasikmalaya','3279':'Kota Banjar',
+        '3101':'Kab. Kep. Seribu','3171':'Kota Jakarta Pusat','3172':'Kota Jakarta Utara',
+        '3173':'Kota Jakarta Barat','3174':'Kota Jakarta Selatan','3175':'Kota Jakarta Timur',
+        '3301':'Kab. Cilacap','3302':'Kab. Banyumas','3303':'Kab. Purbalingga','3304':'Kab. Banjarnegara',
+        '3305':'Kab. Kebumen','3306':'Kab. Purworejo','3307':'Kab. Wonosobo','3308':'Kab. Magelang',
+        '3309':'Kab. Boyolali','3310':'Kab. Klaten','3311':'Kab. Sukoharjo','3312':'Kab. Wonogiri',
+        '3313':'Kab. Karanganyar','3314':'Kab. Sragen','3315':'Kab. Grobogan','3316':'Kab. Blora',
+        '3317':'Kab. Rembang','3318':'Kab. Pati','3319':'Kab. Kudus','3320':'Kab. Jepara',
+        '3321':'Kab. Demak','3322':'Kab. Semarang','3323':'Kab. Temanggung','3324':'Kab. Kendal',
+        '3325':'Kab. Batang','3326':'Kab. Pekalongan','3327':'Kab. Pemalang','3328':'Kab. Tegal',
+        '3329':'Kab. Brebes','3371':'Kota Magelang','3372':'Kota Surakarta','3373':'Kota Salatiga',
+        '3374':'Kota Semarang','3375':'Kota Pekalongan','3376':'Kota Tegal',
+        '3401':'Kab. Kulon Progo','3402':'Kab. Bantul','3403':'Kab. Gunung Kidul','3404':'Kab. Sleman',
+        '3471':'Kota Yogyakarta',
+        '3501':'Kab. Pacitan','3502':'Kab. Ponorogo','3503':'Kab. Trenggalek','3504':'Kab. Tulungagung',
+        '3505':'Kab. Blitar','3506':'Kab. Kediri','3507':'Kab. Malang','3508':'Kab. Lumajang',
+        '3509':'Kab. Jember','3510':'Kab. Banyuwangi','3511':'Kab. Bondowoso','3512':'Kab. Situbondo',
+        '3513':'Kab. Probolinggo','3514':'Kab. Pasuruan','3515':'Kab. Sidoarjo','3516':'Kab. Mojokerto',
+        '3517':'Kab. Jombang','3518':'Kab. Nganjuk','3519':'Kab. Madiun','3520':'Kab. Magetan',
+        '3521':'Kab. Ngawi','3522':'Kab. Bojonegoro','3523':'Kab. Tuban','3524':'Kab. Lamongan',
+        '3525':'Kab. Gresik','3526':'Kab. Bangkalan','3527':'Kab. Sampang','3528':'Kab. Pamekasan',
+        '3529':'Kab. Sumenep','3571':'Kota Kediri','3572':'Kota Blitar','3573':'Kota Malang',
+        '3574':'Kota Probolinggo','3575':'Kota Pasuruan','3576':'Kota Mojokerto','3577':'Kota Madiun',
+        '3578':'Kota Surabaya','3579':'Kota Batu',
+        '3601':'Kab. Pandeglang','3602':'Kab. Lebak','3603':'Kab. Tangerang','3604':'Kab. Serang',
+        '3671':'Kota Tangerang','3672':'Kota Cilegon','3673':'Kota Serang','3674':'Kota Tangerang Selatan',
+        '5101':'Kab. Jembrana','5102':'Kab. Tabanan','5103':'Kab. Badung','5104':'Kab. Gianyar',
+        '5105':'Kab. Klungkung','5106':'Kab. Bangli','5107':'Kab. Karangasem','5108':'Kab. Buleleng',
+        '5171':'Kota Denpasar',
+    };
+
+    function getZodiak(d, m) {
+        const z = [
+            ['Capricorn',20],['Aquarius',19],['Pisces',20],['Aries',20],['Taurus',21],
+            ['Gemini',21],['Cancer',22],['Leo',23],['Virgo',23],['Libra',23],
+            ['Scorpio',22],['Sagittarius',22],['Capricorn',31]
+        ];
+        return d <= z[m-1][1] ? z[m-1][0] : z[m][0];
+    }
+
+    function getGenerasi(tahun) {
+        if (tahun >= 2013) return 'Gen Alpha';
+        if (tahun >= 1997) return 'Gen Z';
+        if (tahun >= 1981) return 'Milenial';
+        if (tahun >= 1965) return 'Gen X';
+        if (tahun >= 1946) return 'Baby Boomer';
+        return 'Silent Generation';
+    }
+
+    function getHari(tgl) {
+        return ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'][tgl.getDay()];
+    }
+
+    function runNikDecode() {
+        const input = document.getElementById('nikInput');
+        const btn = document.getElementById('btnNikCheck');
+        const resultBox = document.getElementById('nikResult');
+        const nik = input.value.trim();
+
+        if (!nik || nik.length !== 16 || !/^\d{16}$/.test(nik)) {
+            alert('⚠️ NIK harus 16 digit angka!');
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner"></span> Decoding...';
+        resultBox.classList.remove('show');
+
+        setTimeout(() => {
+            const provKode = nik.substring(0, 2);
+            const kabKode = nik.substring(0, 4);
+            const kecKode = nik.substring(0, 6);
+            let tgl = parseInt(nik.substring(6, 8));
+            const bln = parseInt(nik.substring(8, 10));
+            const thn = parseInt(nik.substring(10, 12));
+
+            let jk = 'Laki-laki';
+            if (tgl > 40) { jk = 'Perempuan'; tgl -= 40; }
+
+            const currentYear = new Date().getFullYear();
+            const currentYY = currentYear % 100;
+            const fullYear = thn <= currentYY ? 2000 + thn : 1900 + thn;
+
+            const tglObj = new Date(fullYear, bln - 1, tgl);
+            const validTgl = tglObj.getDate() === tgl && tglObj.getMonth() === bln - 1;
+            const validNIK = validTgl && bln >= 1 && bln <= 12 && tgl >= 1 && tgl <= 31;
+
+            const now = new Date();
+            let umur = now.getFullYear() - fullYear;
+            let umurBln = now.getMonth() - (bln - 1);
+            let umurHari = now.getDate() - tgl;
+            if (umurHari < 0) { umurBln--; umurHari += 30; }
+            if (umurBln < 0) { umur--; umurBln += 12; }
+
+            const bulanNama = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+
+            document.getElementById('nikResNik').textContent = nik;
+
+            const validEl = document.getElementById('nikResValid');
+            if (validNIK) {
+                validEl.textContent = '✅ Format Valid';
+                validEl.className = 'result-value valid';
+            } else {
+                validEl.textContent = '❌ Tanggal tidak valid';
+                validEl.className = 'result-value invalid';
+            }
+
+            document.getElementById('nikResProv').textContent = provinsiDB[provKode] || `Kode ${provKode} (tidak dikenal)`;
+            document.getElementById('nikResKab').textContent = kabKotaDB[kabKode] || `Kode ${kabKode}`;
+            document.getElementById('nikResKec').textContent = `Kode ${kecKode}`;
+            document.getElementById('nikResTgl').textContent = `${tgl} ${bulanNama[bln-1]} ${fullYear}`;
+            document.getElementById('nikResHari').textContent = validTgl ? getHari(tglObj) : '-';
+            document.getElementById('nikResUmur').textContent = validNIK ? `${umur} tahun, ${umurBln} bulan, ${umurHari} hari` : '-';
+            document.getElementById('nikResJk').textContent = jk;
+            document.getElementById('nikResZodiak').textContent = validNIK ? getZodiak(tgl, bln) : '-';
+            document.getElementById('nikResGen').textContent = getGenerasi(fullYear);
+            document.getElementById('nikResUrut').textContent = nik.substring(12, 16);
+
+            resultBox.classList.add('show');
+            btn.disabled = false;
+            btn.innerHTML = 'Decode NIK';
+        }, 800);
+    }
+
+    // ============================================================
+    //  DORKING TOOL — AUTO GENERATOR MULTI CATEGORY
+    // ============================================================
+    let dorkCat = 'all';
+
+    function pickDorkCat(el, cat) {
+        dorkCat = cat;
+        document.querySelectorAll('.tab[data-dorkcat]').forEach(t => t.classList.remove('active'));
+        el.classList.add('active');
+        if (document.getElementById('dorkList').children.length) runDorking();
+    }
+
+    // ===== DATABASE DORK =====
+    const DORK_DB = [
+        { cat: 'sensitive', label: 'ENV File',         q: 'filetype:env "DB_PASSWORD"' },
+        { cat: 'sensitive', label: 'Env (alt)',        q: 'filetype:env "APP_KEY"' },
+        { cat: 'sensitive', label: 'Config PHP',       q: 'filetype:php inurl:config "DB_PASSWORD"' },
+        { cat: 'sensitive', label: 'WP Config',        q: 'inurl:wp-config.php "DB_PASSWORD"' },
+        { cat: 'sensitive', label: 'Config JSON',      q: 'filetype:json "password"' },
+        { cat: 'sensitive', label: 'Config YAML',      q: 'filetype:yml "password"' },
+        { cat: 'sensitive', label: 'Docker Compose',   q: 'filetype:yml "docker-compose"' },
+        { cat: 'sensitive', label: 'SQL Dump',         q: 'filetype:sql "INSERT INTO" password' },
+        { cat: 'sensitive', label: 'SQL Backup',       q: 'filetype:sql "CREATE TABLE" "users"' },
+        { cat: 'sensitive', label: 'Backup ZIP',       q: 'filetype:zip "backup"' },
+        { cat: 'sensitive', label: 'Backup SQL',       q: 'filetype:sql backup' },
+        { cat: 'sensitive', label: 'Log Files',        q: 'filetype:log inurl:"error_log"' },
+        { cat: 'sensitive', label: 'Access Log',       q: 'filetype:log "access.log"' },
+        { cat: 'sensitive', label: 'htaccess',         q: 'filetype:htaccess' },
+        { cat: 'sensitive', label: 'Private Key',      q: 'filetype:pem "PRIVATE KEY"' },
+        { cat: 'sensitive', label: 'SSH Key',          q: 'filetype:key "BEGIN RSA"' },
+        { cat: 'sensitive', label: 'Credential TXT',   q: 'filetype:txt "credentials"' },
+        { cat: 'sensitive', label: 'Passwd File',      q: 'filetype:txt "root:x:0:0"' },
+        { cat: 'sensitive', label: 'Shadow File',      q: 'filetype:txt "root:$"' },
+        { cat: 'sensitive', label: 'Git Config',       q: 'inurl:.git/config' },
+        { cat: 'sensitive', label: 'Git Folder',       q: 'inurl:.git/HEAD' },
+        { cat: 'sensitive', label: 'SVN Folder',       q: 'inurl:.svn/entries' },
+        { cat: 'sensitive', label: 'DS_Store',         q: 'inurl:.DS_Store' },
+        { cat: 'sensitive', label: 'Package.json',     q: 'filetype:json "dependencies"' },
+
+        { cat: 'leak', label: 'Email List',            q: 'filetype:txt "@gmail.com" "@yahoo.com"' },
+        { cat: 'leak', label: 'Email CSV',             q: 'filetype:csv "@gmail.com"' },
+        { cat: 'leak', label: 'Email XLSX',            q: 'filetype:xlsx "email"' },
+        { cat: 'leak', label: 'Email Dump',            q: 'filetype:txt "email" "password"' },
+        { cat: 'leak', label: 'Combo List',            q: 'filetype:txt "email:password"' },
+        { cat: 'leak', label: 'Leaked DB',             q: 'filetype:sql "email" "password" "username"' },
+        { cat: 'leak', label: 'Pastebin Leak',         q: 'site:pastebin.com "password"' },
+        { cat: 'leak', label: 'Gist Leak',             q: 'site:gist.github.com "password"' },
+        { cat: 'leak', label: 'Hastebin Leak',         q: 'site:hastebin.com "password"' },
+        { cat: 'leak', label: 'Ghostbin Leak',         q: 'site:ghostbin.com "password"' },
+        { cat: 'leak', label: 'Email Harvest',         q: 'intext:"@" "email list"' },
+        { cat: 'leak', label: 'Password File',         q: 'filetype:txt "password"' },
+        { cat: 'leak', label: 'Credential Dump',       q: 'intext:"username:password"' },
+        { cat: 'leak', label: 'API Key Leak',          q: 'filetype:txt "api_key"' },
+
+        { cat: 'admin', label: 'Admin Login',          q: 'inurl:admin/login' },
+        { cat: 'admin', label: 'Admin Panel',          q: 'inurl:/admin/ intitle:"login"' },
+        { cat: 'admin', label: 'WP Admin',             q: 'inurl:wp-admin' },
+        { cat: 'admin', label: 'WP Login',             q: 'inurl:wp-login.php' },
+        { cat: 'admin', label: 'CPanel',               q: 'inurl:cpanel' },
+        { cat: 'admin', label: 'Plesk',                q: 'inurl:8443' },
+        { cat: 'admin', label: 'Webmin',               q: 'inurl:10000' },
+        { cat: 'admin', label: 'phpMyAdmin',           q: 'inurl:phpmyadmin' },
+        { cat: 'admin', label: 'Adminer',              q: 'inurl:adminer.php' },
+        { cat: 'admin', label: 'Login Page',           q: 'intitle:"login" inurl:login' },
+        { cat: 'admin', label: 'Dashboard',            q: 'intitle:"dashboard" inurl:dashboard' },
+        { cat: 'admin', label: 'Signin Page',          q: 'inurl:signin' },
+        { cat: 'admin', label: 'Joomla Admin',         q: 'inurl:administrator' },
+        { cat: 'admin', label: 'Drupal Login',         q: 'inurl:user/login' },
+        { cat: 'admin', label: 'Tomcat Manager',       q: 'inurl:manager/html' },
+        { cat: 'admin', label: 'Jenkins',              q: 'intitle:"Dashboard [Jenkins]"' },
+        { cat: 'admin', label: 'Grafana',              q: 'intitle:"Grafana" inurl:login' },
+        { cat: 'admin', label: 'Kibana',               q: 'intitle:"Kibana" inurl:login' },
+        { cat: 'admin', label: 'Router Admin',         q: 'intitle:"router" inurl:login' },
+        { cat: 'admin', label: 'Default Password',     q: 'intext:"default password"' },
+
+        { cat: 'sensitive', label: 'Index Of',         q: 'intitle:"index of"' },
+        { cat: 'sensitive', label: 'Open Dir Root',    q: 'intitle:"index of /"' },
+        { cat: 'sensitive', label: 'Open Dir Backups', q: 'intitle:"index of" backup' },
+        { cat: 'sensitive', label: 'Open Dir Uploads', q: 'intitle:"index of" uploads' },
+        { cat: 'sensitive', label: 'Open Dir Config',  q: 'intitle:"index of" config' },
+        { cat: 'sensitive', label: 'Open Dir Logs',    q: 'intitle:"index of" logs' },
+        { cat: 'sensitive', label: 'Open FTP',         q: 'inurl:ftp:// intitle:"index of"' },
+        { cat: 'sensitive', label: 'Server At',        q: 'intitle:"Index of" "server at"' },
+
+        { cat: 'sensitive', label: 'PHP Error',        q: 'intext:"PHP Parse error" "Warning"' },
+        { cat: 'sensitive', label: 'SQL Error',        q: 'intext:"SQL syntax error"' },
+        { cat: 'sensitive', label: 'Warning Include',  q: 'intext:"Warning: include("' },
+        { cat: 'sensitive', label: 'Debug Page',       q: 'intitle:"phpinfo()"' },
+        { cat: 'sensitive', label: 'Stack Trace',      q: 'intext:"Stack trace:"' },
+        { cat: 'sensitive', label: 'Error Log',        q: 'intext:"error log" filetype:log' },
+
+        { cat: 'sensitive', label: 'Subdomain Dev',    q: 'site:*.dev' },
+        { cat: 'sensitive', label: 'Subdomain Staging',q: 'site:staging' },
+        { cat: 'sensitive', label: 'Subdomain Test',   q: 'site:test' },
+        { cat: 'sensitive', label: 'Subdomain API',    q: 'site:api' },
+        { cat: 'sensitive', label: 'Subdomain Admin',  q: 'site:admin' },
+        { cat: 'sensitive', label: 'Subdomain Panel',  q: 'site:panel' },
+    ];
+
+    function runDorking() {
+        const input = document.getElementById('dorkTarget');
+        const btn = document.getElementById('btnDorkRun');
+        const resultBox = document.getElementById('dorkResult');
+        const listEl = document.getElementById('dorkList');
+
+        let domain = input.value.trim();
+        if (!domain) { alert('⚠️ Masukkan domain target!'); return; }
+
+        domain = domain.replace(/^https?:\/\//i, '').replace(/\/.*$/, '').replace(/^www\./i, '').trim();
+        if (!domain.includes('.')) { alert('⚠️ Format domain tidak valid!'); return; }
+
+        const items = dorkCat === 'all'
+            ? DORK_DB
+            : DORK_DB.filter(d => d.cat === dorkCat);
+
+        document.getElementById('dorkDomainOut').textContent = domain;
+        document.getElementById('dorkCountOut').textContent = items.length + ' dork';
+
+        listEl.innerHTML = '';
+
+        const groups = {};
+        items.forEach(it => {
+            if (!groups[it.cat]) groups[it.cat] = [];
+            groups[it.cat].push(it);
+        });
+
+        const catNames = {
+            'sensitive': '🔐 File Sensitif & Config',
+            'leak': '📧 Email Bocor & Leak',
+            'admin': '🛡️ Admin Panel & Login',
+        };
+
+        Object.keys(groups).forEach(cat => {
+            const header = document.createElement('div');
+            header.className = 'result-heading';
+            header.style.marginTop = '14px';
+            header.textContent = catNames[cat] || cat.toUpperCase();
+            listEl.appendChild(header);
+
+            groups[cat].forEach(item => {
+                const query = `${item.q} site:${domain}`;
+                const googleUrl = 'https://www.google.com/search?q=' + encodeURIComponent(query);
+
+                const row = document.createElement('div');
+                row.className = 'email-item';
+                row.style.cursor = 'pointer';
+                row.title = query;
+
+                const span = document.createElement('span');
+                span.textContent = item.label;
+                span.style.flex = '1';
+
+                const goBtn = document.createElement('button');
+                goBtn.className = 'copy-btn';
+                goBtn.textContent = 'OPEN';
+                goBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    window.open(googleUrl, '_blank');
+                };
+
+                row.appendChild(span);
+                row.appendChild(goBtn);
+                row.onclick = () => window.open(googleUrl, '_blank');
+
+                listEl.appendChild(row);
+            });
+        });
+
+        resultBox.classList.add('show');
+
+        const firstQuery = `${items[0].q} site:${domain}`;
+        const firstUrl = 'https://www.google.com/search?q=' + encodeURIComponent(firstQuery);
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner"></span> Membuka...';
+        setTimeout(() => {
+            window.open(firstUrl, '_blank');
+            btn.disabled = false;
+            btn.innerHTML = 'Dorking';
+        }, 500);
+    }
+
+    // ============================================================
+    //  DATA BREACH CHECK — XposedOrNot API
+    // ============================================================
+    function escapeHtml(str) {
+        return String(str).replace(/[&<>"']/g, c => ({
+            '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+        })[c]);
+    }
+
+    async function runBreachCheck() {
+        const input = document.getElementById('breachEmail');
+        const btn = document.getElementById('btnBreachCheck');
+        const resultBox = document.getElementById('breachResult');
+        const listEl = document.getElementById('breachList');
+        const statusEl = document.getElementById('breachStatus');
+        const adviceEl = document.getElementById('breachAdvice');
+
+        const email = input.value.trim().toLowerCase();
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if (!email || !emailRegex.test(email)) {
+            alert('⚠️ Masukkan alamat email yang valid!');
+            return;
+        }
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner"></span> Memeriksa...';
+        resultBox.classList.remove('show');
+        listEl.innerHTML = '';
+        adviceEl.innerHTML = '';
+        statusEl.textContent = 'Menghubungi XposedOrNot API...';
+
+        try {
+            const res = await fetch(`https://api.xposedornot.com/v1/check-email/${encodeURIComponent(email)}`);
+
+            if (res.status === 404) {
+                document.getElementById('breachStatCount').textContent = '0';
+                document.getElementById('breachStatStatus').textContent = '✅';
+                document.getElementById('breachStatRisk').textContent = 'AMAN';
+                document.getElementById('breachStatRisk').style.color = '#d4d4d4';
+                listEl.innerHTML = `
+                    <div style="text-align:center;padding:24px 10px;color:var(--gray-light);font-family:'Share Tech Mono',monospace;font-size:0.8rem;">
+                        <span style="font-size:2rem;display:block;margin-bottom:10px;">🛡️</span>
+                        <div style="letter-spacing:2px;">EMAIL AMAN</div>
+                        <div style="color:var(--text-muted);font-size:0.68rem;margin-top:6px;">Tidak ditemukan di database kebocoran</div>
+                    </div>`;
+                adviceEl.innerHTML = '✅ Email kamu <strong style="color:#d4d4d4;">tidak ditemukan</strong> dalam daftar kebocoran data publik yang diketahui.<br><br>⚠️ Tetap waspada: gunakan password unik & aktifkan 2FA.';
+                statusEl.textContent = '✅ Aman · Sumber: XposedOrNot';
+                resultBox.classList.add('show');
+                btn.disabled = false;
+                btn.innerHTML = '🔍 Cek Kebocoran';
+                return;
+            }
+
+            if (res.status === 200) {
+                const data = await res.json();
+                let breaches = [];
+
+                if (data.breaches && Array.isArray(data.breaches)) {
+                    breaches = data.breaches[0] || [];
+                }
+
+                if (breaches.length && typeof breaches[0] === 'object') {
+                    breaches = breaches.map(b => b.name || b.title || JSON.stringify(b));
+                }
+
+                if (!breaches.length) {
+                    document.getElementById('breachStatCount').textContent = '0';
+                    document.getElementById('breachStatStatus').textContent = '✅';
+                    document.getElementById('breachStatRisk').textContent = 'AMAN';
+                    listEl.innerHTML = `
+                        <div style="text-align:center;padding:24px 10px;color:var(--gray-light);font-family:'Share Tech Mono',monospace;font-size:0.8rem;">
+                            <span style="font-size:2rem;display:block;margin-bottom:10px;">🛡️</span>
+                            <div style="letter-spacing:2px;">EMAIL AMAN</div>
+                        </div>`;
+                    adviceEl.innerHTML = '✅ Tidak ada kebocoran terdeteksi.';
+                    statusEl.textContent = '✅ Sumber: XposedOrNot';
+                    resultBox.classList.add('show');
+                    btn.disabled = false;
+                    btn.innerHTML = '🔍 Cek Kebocoran';
+                    return;
+                }
+
+                const count = breaches.length;
+                const risk = count >= 10 ? 'KRITIS'
+                           : count >= 5  ? 'TINGGI'
+                           : count >= 2  ? 'SEDANG'
+                           : 'RENDAH';
+
+                document.getElementById('breachStatCount').textContent = count;
+                document.getElementById('breachStatStatus').textContent = '⚠️';
+                const riskEl = document.getElementById('breachStatRisk');
+                riskEl.textContent = risk;
+                riskEl.style.color = (risk === 'KRITIS' || risk === 'TINGGI') ? '#f472b6' : '#d4d4d4';
+
+                listEl.innerHTML = '';
+                breaches.sort().forEach((name, i) => {
+                    const item = document.createElement('div');
+                    item.className = 'email-item';
+                    item.style.flexDirection = 'column';
+                    item.style.alignItems = 'flex-start';
+                    item.style.gap = '6px';
+
+                    const title = document.createElement('div');
+                    title.style.cssText = 'display:flex;align-items:center;gap:8px;width:100%;';
+                    title.innerHTML = `
+                        <span style="font-family:'Share Tech Mono',monospace;color:var(--text-muted);font-size:0.65rem;min-width:22px;">#${String(i+1).padStart(2,'0')}</span>
+                        <span style="color:var(--gray-light);font-weight:700;font-size:0.78rem;word-break:break-word;">${escapeHtml(name)}</span>`;
+
+                    const link = document.createElement('a');
+                    link.href = `https://haveibeenpwned.com/PwnedWebsites#${encodeURIComponent(name)}`;
+                    link.target = '_blank';
+                    link.textContent = '🔗 Info detail';
+                    link.style.cssText = 'font-family:"Share Tech Mono",monospace;font-size:0.62rem;color:var(--text-muted);text-decoration:none;letter-spacing:1px;';
+                    link.onmouseover = () => link.style.color = '#ffffff';
+                    link.onmouseout = () => link.style.color = 'var(--text-muted)';
+
+                    item.appendChild(title);
+                    item.appendChild(link);
+                    listEl.appendChild(item);
+                });
+
+                adviceEl.innerHTML = `
+                    ⚠️ Email kamu ditemukan di <strong style="color:#f472b6;">${count} kebocoran data</strong>.<br><br>
+                    <strong style="color:#d4d4d4;">Langkah yang harus dilakukan:</strong><br>
+                    1. 🔑 Ganti password untuk semua akun yang menggunakan email ini<br>
+                    2. 🔐 Aktifkan 2FA (Two-Factor Authentication)<br>
+                    3. 📧 Waspadai email phishing yang mengatasnamakan layanan tersebut<br>
+                    4. 🚫 Jangan gunakan password yang sama di beberapa akun<br>
+                    5. 👀 Pantau aktivitas mencurigakan di akun kamu`;
+
+                statusEl.textContent = `⚠️ Ditemukan di ${count} kebocoran · Sumber: XposedOrNot`;
+                resultBox.classList.add('show');
+            } else {
+                throw new Error(`HTTP ${res.status}`);
+            }
+
+        } catch (error) {
+            statusEl.textContent = '❌ Gagal: ' + error.message;
+            listEl.innerHTML = `
+                <div style="text-align:center;padding:22px 10px;color:#f472b6;font-family:'Share Tech Mono',monospace;font-size:0.78rem;">
+                    <span style="font-size:1.8rem;display:block;margin-bottom:8px;">❌</span>
+                    Gagal memeriksa: ${escapeHtml(error.message)}
+                </div>`;
+            resultBox.classList.add('show');
+        }
+
+        btn.disabled = false;
+        btn.innerHTML = '🔍 Cek Kebocoran';
+    }
+
+    // ============================================================
+    //  LING ANALYZER - LINK THREAT DETECTOR
+    // ============================================================
+    const LING_SHORTENERS = [
+        'bit.ly','tinyurl.com','goo.gl','t.co','ow.ly','is.gd','buff.ly',
+        'shorte.st','adf.ly','bc.vc','cutt.ly','rebrand.ly','shorturl.at',
+        'tiny.cc','lnkd.in','s.id','gg.gg','rb.gy','v.gd','clck.ru'
+    ];
+
+    const LING_SUSPICIOUS_TLDS = [
+        '.tk','.ml','.ga','.cf','.gq','.xyz','.top','.work','.click',
+        '.link','.loan','.download','.review','.country','.kim','.cricket',
+        '.science','.party','.racing','.win','.bid','.stream','.men'
+    ];
+
+    const LING_DANGEROUS_EXT = [
+        '.exe','.apk','.scr','.bat','.cmd','.msi','.vbs','.jar','.ps1',
+        '.dll','.com','.pif','.application','.gadget','.hta','.cpl','.msc'
+    ];
+
+    const LING_PHISHING_KEYWORDS = [
+        'login','verify','secure','account','update','confirm','banking',
+        'paypal','wallet','signin','password','free-gift','bonus','hadiah',
+        'menang','klaim','reward','prize','winner','urgent','suspend',
+        'limited','recovery','unlock','validate','authorize'
+    ];
+
+    const LING_TRUSTED_DOMAINS = [
+        'google.com','youtube.com','facebook.com','github.com','wikipedia.org',
+        'microsoft.com','apple.com','amazon.com','twitter.com','x.com',
+        'instagram.com','whatsapp.com','linkedin.com','reddit.com','netflix.com',
+        'cloudflare.com','mozilla.org','stackoverflow.com','openai.com'
+    ];
+
+    const LING_TYPO_PATTERNS = [
+        'g00gle','faceb00k','paypa1','micros0ft','app1e','amaz0n',
+        'netfl1x','whatsapp-','instagram-','g00g1e'
+    ];
+
+    function runLingAnalyzer() {
+        const input = document.getElementById('lingInput');
+        const btn = document.getElementById('btnLingRun');
+        const banner = document.getElementById('linkRiskBanner');
+        const resultBox = document.getElementById('lingResult');
+
+        let raw = input.value.trim();
+        if (!raw) { alert('⚠️ Masukkan URL terlebih dahulu!'); return; }
+
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner"></span> Menganalisis...';
+        banner.classList.remove('show');
+        resultBox.classList.remove('show');
+
+        setTimeout(() => {
+            let url;
+            try {
+                const normalized = /^https?:\/\//i.test(raw) ? raw : 'http://' + raw;
+                url = new URL(normalized);
+            } catch (e) {
+                alert('⚠️ URL tidak valid!');
+                btn.disabled = false;
+                btn.innerHTML = '🔍 Analisis Tautan';
+                return;
+            }
+
+            const hostname = url.hostname.toLowerCase();
+            const fullUrl = raw.toLowerCase();
+            const path = url.pathname.toLowerCase();
+            const protocol = url.protocol.replace(':', '');
+
+            let score = 0;
+            let details = [];
+            let isTrusted = LING_TRUSTED_DOMAINS.some(d =>
+                hostname === d || hostname.endsWith('.' + d)
+            );
+
+            if (isTrusted) {
+                details.push({ level: 'safe', icon: '✅', text: `Domain terpercaya: ${hostname}` });
+            } else {
+                if (LING_SHORTENERS.some(s => hostname === s || hostname.endsWith('.' + s))) {
+                    score += 25;
+                    details.push({ level: 'warn', icon: '⚠️', text: 'Menggunakan pemendek tautan (shortlink) — tujuan asli tersembunyi' });
+                }
+
+                if (/^\d{1,3}(\.\d{1,3}){3}$/.test(hostname)) {
+                    score += 30;
+                    details.push({ level: 'critical', icon: '🚨', text: 'URL menggunakan alamat IP langsung (bukan domain)' });
+                }
+
+                const matchedTld = LING_SUSPICIOUS_TLDS.find(t => hostname.endsWith(t));
+                if (matchedTld) {
+                    score += 20;
+                    details.push({ level: 'warn', icon: '⚠️', text: `TLD berisiko tinggi: ${matchedTld}` });
+                }
+
+                if (protocol === 'http') {
+                    score += 10;
+                    details.push({ level: 'warn', icon: '⚠️', text: 'Tidak menggunakan HTTPS (tidak terenkripsi)' });
+                } else {
+                    details.push({ level: 'safe', icon: '✅', text: 'Menggunakan HTTPS (terenkripsi)' });
+                }
+
+                if (raw.includes('@')) {
+                    score += 25;
+                    details.push({ level: 'critical', icon: '🚨', text: 'URL mengandung "@" — trik umum phishing' });
+                }
+
+                const subdomainCount = hostname.split('.').length - 2;
+                if (subdomainCount >= 3) {
+                    score += 15;
+                    details.push({ level: 'warn', icon: '⚠️', text: `Subdomain berlebihan (${subdomainCount}) — pola phishing` });
+                }
+
+                const foundKw = LING_PHISHING_KEYWORDS.filter(k => fullUrl.includes(k));
+                if (foundKw.length > 0) {
+                    score += foundKw.length * 8;
+                    details.push({ level: 'warn', icon: '⚠️', text: `Kata kunci sensitif: ${foundKw.slice(0, 5).join(', ')}` });
+                }
+
+                const matchedExt = LING_DANGEROUS_EXT.find(e => path.endsWith(e));
+                if (matchedExt) {
+                    score += 35;
+                    details.push({ level: 'critical', icon: '🚨', text: `File berbahaya terdeteksi: ${matchedExt}` });
+                }
+
+                if (raw.length > 100) {
+                    score += 10;
+                    details.push({ level: 'warn', icon: '⚠️', text: `URL terlalu panjang (${raw.length} karakter)` });
+                }
+
+                const matchedTypo = LING_TYPO_PATTERNS.find(t => hostname.includes(t));
+                if (matchedTypo) {
+                    score += 40;
+                    details.push({ level: 'critical', icon: '🚨', text: `Indikasi typo-squatting: "${matchedTypo}"` });
+                }
+
+                const dashCount = (hostname.match(/-/g) || []).length;
+                if (dashCount >= 3) {
+                    score += 10;
+                    details.push({ level: 'warn', icon: '⚠️', text: `Banyak tanda hubung di domain (${dashCount}) — pola phishing` });
+                }
+
+                const digitCount = (hostname.match(/\d/g) || []).length;
+                if (digitCount >= 4) {
+                    score += 8;
+                    details.push({ level: 'warn', icon: '⚠️', text: `Domain mengandung banyak angka (${digitCount})` });
+                }
+
+                if (details.length === 1) {
+                    details.push({ level: 'safe', icon: 'ℹ️', text: 'Tidak ditemukan indikator berbahaya yang jelas' });
+                }
+            }
+
+            score = Math.min(score, 100);
+
+            let level, color, riskLabel;
+            if (isTrusted || score === 0) {
+                level = '✅ AMAN'; color = '#4ade80'; riskLabel = 'AMAN';
+            } else if (score <= 25) {
+                level = '🟢 RENDAH'; color = '#4ade80'; riskLabel = 'RISIKO RENDAH';
+            } else if (score <= 50) {
+                level = '🟡 WASPADA'; color = '#fbbf24'; riskLabel = 'PERLU WASPADA';
+            } else if (score <= 75) {
+                level = '🟠 BAHAYA'; color = '#f87171'; riskLabel = 'BERBAHAYA';
+            } else {
+                level = '🔴 SANGAT BAHAYA'; color = '#ef4444'; riskLabel = 'SANGAT BERBAHAYA';
+            }
+
+            const bannerEl = document.getElementById('linkRiskBanner');
+            bannerEl.style.color = color;
+            document.getElementById('linkRiskLevel').textContent = level;
+            document.getElementById('linkRiskScoreNum').textContent = score;
+            document.getElementById('linkRiskLabel').textContent = riskLabel;
+
+            const barFill = document.getElementById('linkRiskBarFill');
+            barFill.style.width = '0%';
+            setTimeout(() => { barFill.style.width = score + '%'; }, 100);
+
+            bannerEl.classList.add('show');
+
+            const detailList = document.getElementById('lingDetailList');
+            detailList.innerHTML = details.map(d => `
+                <div class="link-detail-item ${d.level}">
+                    <span class="ld-icon">${d.icon}</span>
+                    <span class="ld-text">${escapeHtml(d.text)}</span>
+                </div>
+            `).join('');
+
+            document.getElementById('lingProtocol').textContent = protocol.toUpperCase();
+            document.getElementById('lingDomain').textContent = hostname;
+            const tld = hostname.includes('.') ? '.' + hostname.split('.').pop() : '-';
+            document.getElementById('lingTld').textContent = tld;
+            document.getElementById('lingPath').textContent = path === '/' ? '/' : path.substring(0, 40) + (path.length > 40 ? '...' : '');
+            document.getElementById('lingLength').textContent = raw.length + ' karakter';
+
+            resultBox.classList.add('show');
+            btn.disabled = false;
+            btn.innerHTML = '🔍 Analisis Tautan';
+        }, 600);
+    }
+
+    // ===== Override openModal untuk reset form =====
+    const _origOpenModal2 = openModal;
+    openModal = function(id) {
+        _origOpenModal2(id);
+        if (id === 'dorkModal') {
+            document.getElementById('dorkTarget').value = '';
+            document.getElementById('dorkResult').classList.remove('show');
+            document.getElementById('dorkList').innerHTML = '';
+            dorkCat = 'all';
+            document.querySelectorAll('.tab[data-dorkcat]').forEach(t => t.classList.remove('active'));
+            document.querySelector('.tab[data-dorkcat="all"]').classList.add('active');
+        }
+        if (id === 'breachModal') {
+            document.getElementById('breachEmail').value = '';
+            document.getElementById('breachResult').classList.remove('show');
+            document.getElementById('breachList').innerHTML = '';
+            document.getElementById('breachAdvice').innerHTML = '';
+        }
+        if (id === 'lingModal') {
+            document.getElementById('lingInput').value = '';
+            document.getElementById('linkRiskBanner').classList.remove('show');
+            document.getElementById('lingResult').classList.remove('show');
+            document.getElementById('lingDetailList').innerHTML = '';
+        }
+    };
+    </script>
+
+</body>
+</html>
